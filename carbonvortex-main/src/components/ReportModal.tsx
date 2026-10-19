@@ -346,25 +346,19 @@ Atık ceviz kabuklarından çevre dostu piroliz ve gözenek aktivasyonu ile üre
           <p className="text-xs text-slate-600 mb-3">
             Analiz edilen su numunesinde tespit edilen baskın mikroplastik polimerlerinin dağılımı:
           </p>
-          {sample.particles.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {sample.particles.map((p) => (
-                <div key={p.id} className="p-2 rounded bg-slate-50 border border-slate-200 text-[11px]">
-                  <div className="flex items-center justify-between font-mono">
-                    <span className="font-bold text-slate-900">{p.customLabel || p.type}</span>
-                    <span className="text-teal-700 font-semibold">{p.sizeMicrons.toFixed(1)} µm</span>
-                  </div>
-                  <div className="text-slate-500 text-[10px] mt-0.5">
-                    {p.shape} • Güven: %{Math.round(p.confidence * 100)}
-                  </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {sample.particles.map((p) => (
+              <div key={p.id} className="p-2 rounded bg-slate-50 border border-slate-200 text-[11px]">
+                <div className="flex items-center justify-between font-mono">
+                  <span className="font-bold text-slate-900">{p.customLabel || p.type}</span>
+                  <span className="text-teal-700 font-semibold">{p.sizeMicrons.toFixed(1)} µm</span>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-medium">
-              ✅ Görsel spektroskopik taramada hiçbir yabancı mikroplastik partikülü veya lifi tespit edilmemiştir. Su berrak, saf ve doğrudan insan tüketimi için güvenlidir.
-            </div>
-          )}
+                <div className="text-slate-500 text-[10px] mt-0.5">
+                  {p.shape} • Güven: %{Math.round(p.confidence * 100)}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Conclusion & TÜBİTAK Sign-off */}
@@ -373,7 +367,7 @@ Atık ceviz kabuklarından çevre dostu piroliz ve gözenek aktivasyonu ile üre
             5. Sonuç ve Proje Değerlendirmesi
           </h3>
           <p className="text-xs text-slate-700 leading-relaxed text-justify mb-8">
-            Deneysel veriler ve yapay zeka spektroskopik tarama sonuçları doğrultusunda, tarımsal atık ceviz kabuklarından üretilen yüksek gözenekli granüler aktif karbon filtresi, <strong>%{sample.efficiency.toFixed(1)}</strong> mikroplastik giderim başarısına ulaşmıştır. Zengin mikro/mezogözenek yapısı ve pi-pi bağ etkileşimi sayesinde mikroplastikler kalıcı olarak adsorbe edilmiştir. {!sample.isDrinkable ? <strong className="text-rose-700">Ham suyun kirli/deniz atığı karakteristiği nedeniyle içilmesi kesinlikle sakıncalıdır; tam içme suyu kalitesi için ek ters ozmos ve sterilizasyon önerilir.</strong> : <strong className="text-emerald-700">Numune berrak, temiz ve içilebilir su standartlarındadır. İnsan sağlığı için tamamen güvenli ve tüketime uygundur.</strong>} Bu çalışma TÜBİTAK AR-GE kriterlerine uygundur.
+            Deneysel veriler ve yapay zeka spektroskopik tarama sonuçları doğrultusunda, tarımsal atık ceviz kabuklarından üretilen yüksek gözenekli granüler aktif karbon filtresi, <strong>%{sample.efficiency.toFixed(1)}</strong> mikroplastik giderim başarısına ulaşmıştır. Zengin mikro/mezogözenek yapısı ve pi-pi bağ etkileşimi sayesinde mikroplastikler kalıcı olarak adsorbe edilmiştir. {!sample.isDrinkable ? <strong className="text-rose-700">Ham suyun kirli/deniz atığı karakteristiği nedeniyle içilmesi kesinlikle sakıncalıdır; tam içme suyu kalitesi için ek ters ozmos ve sterilizasyon önerilir.</strong> : 'Süzülen su berrak içme suyu standartlarını yakalamıştır.'} Bu çalışma TÜBİTAK AR-GE kriterlerine uygundur.
           </p>
 
           <div className="flex justify-between items-end text-xs text-slate-600 font-mono">

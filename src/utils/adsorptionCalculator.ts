@@ -41,6 +41,9 @@ export function calculateDynamicSampleData(
     afterImage: string;
     particles: MicroplasticParticle[];
     baseTurbidity?: number;
+    isDrinkable?: boolean;
+    potabilityStatus?: SampleData['potabilityStatus'];
+    potabilityWarning?: string;
   },
   params: CarbonParameters = DEFAULT_CARBON_PARAMS
 ): SampleData {
@@ -81,7 +84,7 @@ export function calculateDynamicSampleData(
     baseSample.baseTurbidity !== undefined
       ? baseSample.baseTurbidity
       : particleCount === 0
-      ? 1.2
+      ? 0.52
       : +(Math.min(32, 4.5 + particleCount * 2.8)).toFixed(1);
 
   // 3. Dynamic Adsorption Efficiency Calculation based on Carbon Matrix Parameters
@@ -93,7 +96,7 @@ export function calculateDynamicSampleData(
   if (calculatedInitialConc === 0) {
     efficiency = 100.0;
     treatedConcentration = 0;
-    treatedTurbidity = 0.35;
+    treatedTurbidity = 0.38;
     qe = 0.0;
   } else {
     // Scientific pseudo-second-order & Langmuir pore filling factor:
@@ -137,8 +140,6 @@ export function calculateDynamicSampleData(
 
   // 4. Update Particle Entrapment Status based on particle size vs pore size distribution
   const updatedParticles: MicroplasticParticle[] = particles.map((p, idx) => {
-    // Micropores (< 2nm) & Mesopores (2 - 50 nm) & GAC Interstitial Void (< 150 µm)
-    // Particles under 120 µm are strongly captured with >95% probability
     const size = p.sizeMicrons || 35;
     const isTrapped = size < 180 ? true : idx % 7 !== 0;
 
@@ -152,6 +153,35 @@ export function calculateDynamicSampleData(
         : 'Yüksek debi nedeniyle karbon yatağında sınırlı temas sağladı.',
     };
   });
+
+  // 5. Water Potability & Health Hazard Assessment (İçilmeye Uygun mu?)
+  let isDrinkable: boolean;
+  let potabilityStatus: SampleData['potabilityStatus'];
+  let potabilityWarning: string;
+  let microplasticRiskLevel: SampleData['microplasticRiskLevel'];
+
+  if (baseSample.isDrinkable !== undefined) {
+    isDrinkable = baseSample.isDrinkable;
+    potabilityStatus = baseSample.potabilityStatus || (isDrinkable ? 'İÇİLMEYE UYGUN' : 'İÇİLMEYE UYGUN DEĞİL');
+    potabilityWarning =
+      baseSample.potabilityWarning ||
+      (isDrinkable
+        ? '✅ Bu numune berrak, şeffaf ve güvenli içme suyudur. Mikroplastik parçacığı saptanmamıştır. DSÖ ve Sağlık Bakanlığı içme suyu standartlarına UYGUNDUR.'
+        : '🛑 DİKKAT: Numunede şeffaf parçacıklar, mikroplastikler ve polimer kalıntıları tespit edilmiştir. Bulanıklık ve partikül yoğunluğu içme suyu sınırlarının üzerinde olduğu için İÇİLMEYE UYGUN DEĞİLDİR!');
+    microplasticRiskLevel = isDrinkable ? 'TEMİZ' : 'AŞIRI YÜKSEK';
+  } else if (particleCount === 0 && initialTurbidity < 2.5) {
+    isDrinkable = true;
+    potabilityStatus = 'İÇİLMEYE UYGUN';
+    microplasticRiskLevel = 'TEMİZ';
+    potabilityWarning =
+      '✅ Bu numune berrak, şeffaf ve güvenli içme suyudur. Mikroplastik parçacığı veya bulanıklık saptanmamıştır. DSÖ ve Sağlık Bakanlığı standartlarına UYGUNDUR.';
+  } else {
+    isDrinkable = false;
+    potabilityStatus = 'İÇİLMEYE UYGUN DEĞİL';
+    microplasticRiskLevel = particleCount > 8 || calculatedInitialConc > 50 ? 'AŞIRI YÜKSEK' : 'YÜKSEK';
+    potabilityWarning =
+      '🛑 DİKKAT: Numunede şeffaf parçacıklar, mikroplastikler ve polimer kalıntıları saptanmıştır. Bulanıklık ve partikül yoğunluğu içme suyu sınırlarının üzerinde olduğu için İÇİLMEYE UYGUN DEĞİLDİR!';
+  }
 
   // 5. Dynamic Kinetic Curves (Adsorption vs Time)
   const kineticData = [
@@ -278,42 +308,7 @@ export function calculateDynamicSampleData(
     },
   ];
 
-  // 8. Strict Water Potability & Health Hazard Assessment
-  const isContaminatedSource =
-    particleCount >= 4 ||
-    calculatedInitialConc > 25 ||
-    initialTurbidity > 4.0 ||
-    /kirli|atık|deniz|çöp|plastik|kanal|nehir|sea|waste|pollut/i.test(
-      `${baseSample.title} ${baseSample.source} ${baseSample.description}`
-    );
-
-  let potabilityStatus: 'İÇİLEMEZ' | 'ŞARTLI' | 'İÇİLEBİLİR';
-  let microplasticRiskLevel: 'AŞIRI YÜKSEK' | 'YÜKSEK' | 'ORTA' | 'DÜŞÜK' | 'TEMİZ';
-  let potabilityWarning: string;
-  let isDrinkable = false;
-
-  if (isContaminatedSource || particleCount >= 5) {
-    potabilityStatus = 'İÇİLEMEZ';
-    microplasticRiskLevel =
-      particleCount > 8 || calculatedInitialConc > 60 || initialTurbidity > 10
-        ? 'AŞIRI YÜKSEK'
-        : 'YÜKSEK';
-    isDrinkable = false;
-    potabilityWarning =
-      '🛑 KRİTİK SAĞLIK UYARISI: Bu su numunesi yoğun mikroplastik lifleri, polimer parçacıkları ve zararlı atıklar içermektedir. KESİNLİKLE İÇİLEMEZ! Doğrudan tüketilmesi halinde gastrointestinal ve hücresel toksisite tehlikesi oluşturur. DSÖ (WHO) içme suyu standartlarına aykırıdır.';
-  } else if (particleCount > 0) {
-    potabilityStatus = 'ŞARTLI';
-    microplasticRiskLevel = 'ORTA';
-    isDrinkable = false;
-    potabilityWarning =
-      '⚠️ DİKKAT: Numunede mikroplastik partikülleri tespit edilmiştir. Doğrudan içilmesi önerilmez; filtrasyon ve dezenfeksiyon gereklidir.';
-  } else {
-    potabilityStatus = 'İÇİLEBİLİR';
-    microplasticRiskLevel = 'TEMİZ';
-    isDrinkable = true;
-    potabilityWarning =
-      'Mikroplastik partikülü saptanmadı. Bulanıklık ve berraklık parametreleri içme suyu sınırları dahilindedir.';
-  }
+  // 8. Return comprehensive SampleData object
 
   return {
     id: baseSample.id,

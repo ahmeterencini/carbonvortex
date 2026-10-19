@@ -29,7 +29,7 @@ export interface SampleData {
   turbidityAfter: number; // NTU
   betSurfaceArea?: number; // m²/g
   iodineNumber?: number; // mg/g
-  potabilityStatus?: 'İÇİLEMEZ' | 'ŞARTLI' | 'İÇİLEBİLİR' | 'İÇİLEBİLİR (GÜVENLİ)';
+  potabilityStatus?: 'İÇİLMEYE UYGUN' | 'İÇİLMEYE UYGUN DEĞİL' | 'İÇİLEMEZ' | 'ŞARTLI' | 'İÇİLEBİLİR' | 'SU NUMUNESİ DEĞİL';
   potabilityWarning?: string;
   microplasticRiskLevel?: 'AŞIRI YÜKSEK' | 'YÜKSEK' | 'ORTA' | 'DÜŞÜK' | 'TEMİZ';
   isDrinkable?: boolean;

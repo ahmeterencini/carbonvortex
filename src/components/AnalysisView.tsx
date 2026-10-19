@@ -142,8 +142,45 @@ export const AnalysisView: React.FC<AnalysisViewProps> = ({
 
   return (
     <div className="space-y-5 pb-20">
-      {/* Critical Potability Warning Banner (Kirli Su İçilemez Uyarısı) */}
-      {!sample.isDrinkable && (
+      {/* Critical Potability Quality Banner (İçilmeye Uygun vs İçilmeye Uygun Değil) */}
+      {sample.isDrinkable ? (
+        <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 border-2 border-emerald-400 rounded-2xl p-4 sm:p-5 shadow-2xl animate-in zoom-in-95 duration-200">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <div className="w-11 h-11 rounded-2xl bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-emerald-300 shadow-lg shadow-emerald-500/30 shrink-0">
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
+              <div>
+                <div className="flex flex-wrap items-center gap-2 mb-1">
+                  <span className="px-2.5 py-0.5 rounded-md bg-emerald-500 text-slate-950 font-black text-xs tracking-wider uppercase">
+                    ✅ SU ANALİZ RAPORU: İÇİLMEYE UYGUN
+                  </span>
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-black/70 text-emerald-300 border border-emerald-700 font-bold">
+                    DSÖ (WHO) STANDARTLARINA UYGUN
+                  </span>
+                </div>
+                <p className="text-xs sm:text-sm text-slate-200 font-medium">
+                  {sample.potabilityWarning ||
+                    'Bu numunede sağlığa zararlı mikroplastik parçacığı, polimer lifi veya bulanıklık saptanmamıştır. Su berrak, şeffaf ve güvenle tüketilebilir.'}
+                </p>
+                <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] font-mono text-emerald-300">
+                  <span>• Mikroplastik Yoğunluğu: <strong>0 adet/ml (Sıfır Risk)</strong></span>
+                  <span>• Bulanıklık: <strong>{sample.turbidityBefore} NTU</strong> (Sınır &lt; 1.0)</span>
+                  <span>• Kalite Onayı: <strong>Temiz ve Güvenli İçme Suyu</strong></span>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={onNavigateToComparison}
+              className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/30 whitespace-nowrap self-stretch sm:self-auto justify-center transition"
+            >
+              <Columns className="w-4 h-4" />
+              <span>Kıyasla Sekmesine Git (2 Veri)</span>
+            </button>
+          </div>
+        </div>
+      ) : (
         <div className="bg-gradient-to-r from-rose-950 via-slate-900 to-rose-950 border-2 border-rose-500 rounded-2xl p-4 sm:p-5 shadow-2xl animate-pulse">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div className="flex items-start gap-3">
@@ -153,15 +190,15 @@ export const AnalysisView: React.FC<AnalysisViewProps> = ({
               <div>
                 <div className="flex flex-wrap items-center gap-2 mb-1">
                   <span className="px-2.5 py-0.5 rounded-md bg-rose-600 text-white font-black text-xs tracking-wider uppercase">
-                    🛑 SU ANALİZ RAPORU: KESİNLİKLE İÇİLEMEZ (TEHLİKELİ)
+                    🛑 SU ANALİZ RAPORU: İÇİLMEYE UYGUN DEĞİL
                   </span>
                   <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-black/70 text-rose-300 border border-rose-700 font-bold">
-                    Mikroplastik Yoğunluğu: {sample.microplasticRiskLevel || 'AŞIRI YÜKSEK (KRİTİK)'}
+                    Mikroplastik Yoğunluğu: {sample.microplasticRiskLevel || 'YÜKSEK (MİKROPLASTİK TESPİT EDİLDİ)'}
                   </span>
                 </div>
                 <p className="text-xs sm:text-sm text-slate-200 font-medium">
                   {sample.potabilityWarning ||
-                    'Bu numunede yüksek konsantrasyonda mikroplastik parçacıkları, polimer lifleri ve su kirliliği tespit edilmiştir. Doğrudan tüketilmesi zehirlenme ve hücresel hasar riski taşır. DSÖ ve Sağlık Bakanlığı içme suyu standartlarına KESİNLİKLE UYGUN DEĞİLDİR.'}
+                    'Bu numunede şeffaf parçacıklar, polimer lifleri ve yüksek bulanıklık saptanmıştır. Doğrudan tüketilmesi sağlık açısından tehlikeli olup İÇİLMEYE UYGUN DEĞİLDİR.'}
                 </p>
                 <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] font-mono text-rose-300">
                   <span>• Bulanıklık: {sample.turbidityBefore} NTU (İçme limiti &lt; 1.0)</span>

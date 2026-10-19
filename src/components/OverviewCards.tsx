@@ -26,31 +26,31 @@ export const OverviewCards: React.FC<OverviewCardsProps> = ({ sample }) => {
           <>
             <div className="flex items-baseline gap-1.5">
               <span className={`text-2xl sm:text-3xl font-extrabold font-mono ${
-                !sample.isDrinkable || sample.potabilityStatus === 'İÇİLEMEZ'
-                  ? 'text-rose-400'
-                  : 'text-white'
+                sample.isDrinkable ? 'text-emerald-400' : 'text-rose-400'
               }`}>
-                {!sample.isDrinkable || sample.potabilityStatus === 'İÇİLEMEZ'
-                  ? sample.initialConcentration
-                  : sample.treatedConcentration}
+                {sample.isDrinkable ? 0 : sample.initialConcentration}
               </span>
               <span className="text-xs text-slate-400 font-mono">adet/ml</span>
-              {!sample.isDrinkable && (
+              {sample.isDrinkable ? (
+                <span className="text-[10px] px-1.5 py-0.5 rounded font-bold bg-emerald-950 text-emerald-300 border border-emerald-500/60 ml-auto">
+                  ✅ İÇİLMEYE UYGUN
+                </span>
+              ) : (
                 <span className="text-[10px] px-1.5 py-0.5 rounded font-black bg-rose-950 text-rose-300 border border-rose-700 ml-auto">
-                  AŞIRI YÜKSEK
+                  İÇİLEMEZ
                 </span>
               )}
             </div>
             <div className="mt-2 flex items-center gap-1 text-[11px] font-medium">
-              {!sample.isDrinkable || sample.potabilityStatus === 'İÇİLEMEZ' ? (
-                <span className="text-rose-400 font-semibold flex items-center gap-1">
-                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                  <span>Ham Su: ❌ Kesinlikle İçilemez!</span>
+              {sample.isDrinkable ? (
+                <span className="text-emerald-400 font-semibold flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                  <span>Temiz ve berrak içme suyu</span>
                 </span>
               ) : (
-                <span className="text-emerald-400 flex items-center gap-1">
-                  <TrendingDown className="w-3.5 h-3.5 shrink-0" />
-                  <span>{sample.initialConcentration} adet/ml'den düştü</span>
+                <span className="text-rose-400 font-semibold flex items-center gap-1">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  <span>🛑 Ham Su: İçilmeye Uygun Değil</span>
                 </span>
               )}
             </div>
@@ -126,21 +126,21 @@ export const OverviewCards: React.FC<OverviewCardsProps> = ({ sample }) => {
             </span>
             <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${
               isLoaded
-                ? !sample.isDrinkable || sample.potabilityStatus === 'İÇİLEMEZ'
+                ? !sample.isDrinkable
                   ? 'bg-rose-950 text-rose-300 border-rose-600'
-                  : 'bg-teal-500/20 text-teal-300 border-teal-400/30'
+                  : 'bg-emerald-950 text-emerald-300 border-emerald-500/60'
                 : 'bg-slate-800 text-slate-400 border-slate-700'
             }`}>
               {isLoaded ? (
-                !sample.isDrinkable || sample.potabilityStatus === 'İÇİLEMEZ' ? (
+                !sample.isDrinkable ? (
                   <>
                     <AlertCircle className="w-3 h-3 text-rose-400" />
-                    Ham Su: KESİNLİKLE İÇİLEMEZ
+                    İÇİLMEYE UYGUN DEĞİL
                   </>
                 ) : (
                   <>
-                    <CheckCircle2 className="w-3 h-3 text-teal-400" />
-                    Doğrulandı
+                    <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                    İÇİLMEYE UYGUN
                   </>
                 )
               ) : (

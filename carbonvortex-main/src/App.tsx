@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import { TabType, SampleData, MicroplasticParticle } from './types';
-import { INITIAL_SAMPLES } from './data/sampleData';
+import {
+  INITIAL_SAMPLES,
+  CLEAN_WATER_SAMPLE_1,
+  CLEAN_WATER_SAMPLE_2,
+  CONTAMINATED_SAMPLE_3,
+} from './data/sampleData';
 import { Header } from './components/Header';
 import { Navigation } from './components/Navigation';
 import { OverviewCards } from './components/OverviewCards';
@@ -12,6 +17,7 @@ import { ChartsView } from './components/ChartsView';
 import { ReportModal } from './components/ReportModal';
 import { RejectionWarningModal } from './components/RejectionWarningModal';
 import { calculateDynamicSampleData, CarbonParameters, DEFAULT_CARBON_PARAMS } from './utils/adsorptionCalculator';
+import { analyzeWaterImageRealtime } from './utils/realtimeWaterAI';
 import confetti from 'canvas-confetti';
 
 export default function App() {
@@ -90,7 +96,7 @@ export default function App() {
 
         ctx.fillStyle = '#34d399';
         ctx.font = '10px monospace';
-        ctx.fillText('BULANIKLIK: 0.65 NTU • MİKROPLASTİKLER GÖZENEKLERDE TUTULDU', 24, canvas.height - 14);
+        ctx.fillText('BULANIKLIK: 0.52 NTU • MİKROPLASTİKLER GÖZENEKLERDE TUTULDU', 24, canvas.height - 14);
 
         resolve(canvas.toDataURL('image/jpeg', 0.92));
       };
@@ -103,11 +109,11 @@ export default function App() {
   const runRealTimeSimulation = (sampleToLoad: SampleData) => {
     setIsAnalyzing(true);
     setAnalysisProgress(0);
-    setAnalysisStep('Görsel ve spektral dalga boyu matrisi okunuyor...');
+    setAnalysisStep('Görsel spektroskopik dalga boyu matrisi okunuyor...');
 
     const interval = setInterval(() => {
       setAnalysisProgress((prev) => {
-        const next = prev + 5;
+        const next = prev + 8;
         if (next >= 100) {
           clearInterval(interval);
           setTimeout(() => {
@@ -117,39 +123,44 @@ export default function App() {
               return exists ? prevSamples : [sampleToLoad, ...prevSamples];
             });
             setIsAnalyzing(false);
-            setActiveTab('analysis');
+            setActiveTab('upload');
             confetti({
-              particleCount: 70,
-              spread: 70,
+              particleCount: sampleToLoad.isDrinkable ? 90 : 65,
+              spread: 75,
               origin: { y: 0.6 },
-              colors: ['#14b8a6', '#10b981', '#38bdf8'],
+              colors: sampleToLoad.isDrinkable
+                ? ['#10b981', '#34d399', '#2dd4bf', '#38bdf8']
+                : ['#ec4899', '#f59e0b', '#ef4444'],
             });
           }, 300);
           return 100;
         }
 
         if (next < 30) {
-          setAnalysisStep('Görsel piksel matrisi ve spektral kanallar çözümleniyor...');
+          setAnalysisStep('Görsel piksel matrisi ve optik kanallar çözümleniyor...');
         } else if (next < 65) {
-          setAnalysisStep('FTIR Spektroskopik Lazer Taraması Yapılıyor (100x Optik Reticle)...');
+          setAnalysisStep('FTIR Spektroskopik Lazer Taraması Yapılıyor (Optik Reticle)...');
         } else if (next < 85) {
-          setAnalysisStep('Mikroplastik Parçacıkları (PET Filaman, PP Elyaf) Saptanıyor & Etiketleniyor...');
+          setAnalysisStep(
+            sampleToLoad.isDrinkable
+              ? 'Temiz su berraklığı ve saflık kriterleri doğrulanıyor ("İçilmeye Uygun")...'
+              : 'Şeffaf parçacıklar ve polimer lifleri saptanıyor ("İçilmeye Uygun Değil")...'
+          );
         } else {
-          setAnalysisStep('Atık Ceviz Kabuğu Aktif Karbon Gözenek Adsorpsiyonu & Süzülme Hesaplanıyor...');
+          setAnalysisStep('Su içilebilirlik durumu ve aktif karbon adsorpsiyonu hesaplanıyor...');
         }
 
         return next;
       });
-    }, 70);
+    }, 55);
   };
 
-  // User uploads a photo -> Send to Google Gemini on backend
+  // User uploads a photo -> Instant Real-Time AI Computer Vision Analysis
   const handleCustomImageUploaded = async (file: File) => {
     setIsAnalyzing(true);
-    setAnalysisProgress(12);
-    setAnalysisStep('Fotoğraf Gemini AI Spektroskopi servisine yükleniyor...');
+    setAnalysisProgress(15);
+    setAnalysisStep('Fotoğraf gerçek zamanlı yapay zeka bilgisayarlı görü motoruna aktarılıyor...');
 
-    // Convert file to Base64
     const reader = new FileReader();
     reader.readAsDataURL(file);
 
@@ -158,79 +169,104 @@ export default function App() {
 
       try {
         setAnalysisProgress(35);
-        setAnalysisStep('Gemini 3.8 Flash görsel içeriğini inceliyor (Su/Mikroskopi doğrulama)...');
+        setAnalysisStep('Yapay zeka sıvı ve su numunesi varlığını denetliyor...');
 
-        const response = await fetch('/api/analyze-image', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            imageBase64: base64Url,
-            mimeType: file.type || 'image/jpeg',
+        // 1. Gerçek Zamanlı İstemci Bilgisayarlı Görü Analizi (Client-Side Real-Time AI)
+        const realtimeAIResult = await analyzeWaterImageRealtime(base64Url, file.name);
+
+        // Su numunesi içermiyorsa: Nazikçe uyar
+        if (!realtimeAIResult.isRelevant) {
+          setIsAnalyzing(false);
+          setRejectionWarning({
+            title: 'Numune Doğrulama Uyarısı',
+            message:
+              realtimeAIResult.rejectionReason ||
+              'Yüklediğiniz görselde su veya sıvı numunesi tespit edilemedi. Lütfen analiz için bir su bardağı, berrak su akıntısı veya su numunesi fotoğrafı yükleyiniz.',
             filename: file.name,
-          }),
-        });
-
-        if (!response.ok) {
-          const errData = await response.json().catch(() => ({}));
-          throw new Error(errData.error || 'Sunucu analizi tamamlayamadı.');
+          });
+          return;
         }
 
-        const aiResult = await response.json();
-        setAnalysisProgress(70);
-        setAnalysisStep('Spektroskopik sonuçlar ve gerçek polimer etiketleri çözümleniyor...');
+        setAnalysisProgress(65);
+        setAnalysisStep('Şeffaf parçacıklar, mikroplastikler ve optik bulanıklık taranıyor...');
 
-        // If image is UNRELATED (not water, not microscopy, not filter):
+        // Sunucu analizi (varsa zenginleştir)
+        let aiResult: any = realtimeAIResult;
+        try {
+          const response = await fetch('/api/analyze-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              imageBase64: base64Url,
+              mimeType: file.type || 'image/jpeg',
+              filename: file.name,
+            }),
+          });
+          if (response.ok) {
+            const serverData = await response.json();
+            if (serverData.isRelevant !== undefined) {
+              aiResult = serverData;
+            }
+          }
+        } catch {
+          // Sunucu yanıt vermese de gerçek zamanlı yapay zeka kesintisiz çalışır
+        }
+
         if (!aiResult.isRelevant) {
           setIsAnalyzing(false);
           setRejectionWarning({
             title: 'Numune Doğrulama Uyarısı',
             message:
               aiResult.rejectionReason ||
-              'Yüklediğiniz görsel bir su numunesi, mikroskop çekimi veya filtre ile eşleşmedi. Lütfen geçerli bir su numunesi fotoğrafı yükleyiniz.',
+              'Yüklediğiniz görsel geçerli bir su numunesi ile eşleşmedi. Lütfen bir su bardağı veya su fotoğrafı yükleyiniz.',
             filename: file.name,
           });
           return;
         }
 
-        // If RELEVANT: Process real detected particles with dynamic tags directly on the image
         setAnalysisProgress(88);
-        setAnalysisStep('Mikroplastik etiketleri (PET Filaman, PP Elyaf vb.) görsel üzerine işleniyor...');
+        setAnalysisStep(
+          aiResult.isDrinkable
+            ? 'Numune berrak: "İçilmeye Uygun" kalite parametreleri hesaplandı.'
+            : 'Şeffaf ve polimer parçacıklar haritalandı: "İçilmeye Uygun Değil" raporlandı.'
+        );
 
         const formattedParticles: MicroplasticParticle[] = (aiResult.particles || []).map(
           (p: any, idx: number) => ({
             id: p.id || `ai-p-${idx + 1}`,
             type: (p.type as any) || 'PET',
-            customLabel: p.customLabel || `${p.type} Filaman`,
+            customLabel: p.customLabel || `${p.type} Pulu`,
             sizeMicrons: typeof p.sizeMicrons === 'number' ? p.sizeMicrons : 35.0,
             x: Math.max(5, Math.min(95, p.x ?? 50)),
             y: Math.max(5, Math.min(95, p.y ?? 50)),
-            shape: p.shape || 'Lif (Fiber)',
+            shape: p.shape || 'Parçacık (Fragment)',
             capturedByBiochar: p.capturedByBiochar ?? true,
-            confidence: p.confidence || 0.94,
-            color: p.color || '#ec4899',
+            confidence: p.confidence || 0.95,
+            color: p.color || '#38bdf8',
             notes: p.notes || 'Atık ceviz kabuğu aktif karbonunun gözeneklerinde tutuldu.',
           })
         );
 
-        // Generate treated water visual
-        const treatedImage = await createTreatedWaterVisual(base64Url);
+        const treatedImage = aiResult.isDrinkable
+          ? base64Url
+          : await createTreatedWaterVisual(base64Url);
 
-        // Scientific Dynamic Adsorption Calculation based on detected particles and active carbon
         const baseSampleInfo = {
           id: `ai-sample-${Date.now()}`,
           title: aiResult.sampleTypeTitle || `Yapay Zeka Analizi: ${file.name}`,
-          source: `Kullanıcı Numunesi (${file.name}) • Gemini 3.8 Flash Analizi`,
+          source: `Kullanıcı Numunesi (${file.name}) • Gerçek Zamanlı AI Analizi`,
           description:
             aiResult.summaryNote ||
-            'Gemini multimodal yapay zeka tarafından analiz edilen numunede mikroplastik parçacıkları saptandı.',
+            (aiResult.isDrinkable
+              ? 'Yapay zeka optik analizinde mikroplastik veya bulanıklık saptanmamıştır. Su temiz ve içilmeye uygundur.'
+              : 'Numunede şeffaf parçacıklar ve mikroplastik polimerleri tespit edilmiştir.'),
           beforeImage: base64Url,
           afterImage: treatedImage,
           particles: formattedParticles,
           baseTurbidity: aiResult.turbidityBefore,
           isDrinkable: aiResult.isDrinkable,
-          potabilityStatus: aiResult.potabilityStatus,
+          potabilityStatus: aiResult.potabilityStatus || (aiResult.isDrinkable ? 'İÇİLMEYE UYGUN' : 'İÇİLMEYE UYGUN DEĞİL'),
           potabilityWarning: aiResult.potabilityWarning,
-          microplasticRiskLevel: aiResult.microplasticLevel,
         };
 
         const calculatedSample = calculateDynamicSampleData(baseSampleInfo, DEFAULT_CARBON_PARAMS);
@@ -240,12 +276,14 @@ export default function App() {
           setCurrentSample(calculatedSample);
           setSamples((prev) => [calculatedSample, ...prev]);
           setIsAnalyzing(false);
-          setActiveTab('analysis'); // Auto transition to Analysis view
+          setActiveTab('upload');
           confetti({
-            particleCount: 80,
-            spread: 75,
+            particleCount: calculatedSample.isDrinkable ? 100 : 70,
+            spread: 80,
             origin: { y: 0.6 },
-            colors: ['#14b8a6', '#10b981', '#38bdf8'],
+            colors: calculatedSample.isDrinkable
+              ? ['#10b981', '#34d399', '#2dd4bf', '#38bdf8']
+              : ['#ec4899', '#f59e0b', '#ef4444'],
           });
         }, 300);
       } catch (err: any) {
@@ -255,7 +293,7 @@ export default function App() {
           title: 'Yapay Zeka Analiz Bildirimi',
           message:
             err.message ||
-            'Görsel analiz edilirken bir bağlantı hatası oluştu. Lütfen görseli kontrol edip tekrar deneyiniz.',
+            'Görsel analiz edilirken bir hata oluştu. Lütfen görseli kontrol edip tekrar deneyiniz.',
           filename: file.name,
         });
       }
@@ -285,10 +323,6 @@ export default function App() {
         afterImage: currentSample.afterImage,
         particles: currentSample.particles,
         baseTurbidity: currentSample.turbidityBefore,
-        isDrinkable: currentSample.isDrinkable,
-        potabilityStatus: currentSample.potabilityStatus,
-        potabilityWarning: currentSample.potabilityWarning,
-        microplasticRiskLevel: currentSample.microplasticRiskLevel,
       },
       params
     );
@@ -300,8 +334,8 @@ export default function App() {
   };
 
   // Demo sample loader
-  const handleLoadDemoSample = (presetSample?: SampleData) => {
-    runRealTimeSimulation(presetSample || INITIAL_SAMPLES[0]);
+  const handleLoadDemoSample = () => {
+    runRealTimeSimulation(INITIAL_SAMPLES[0]);
   };
 
   // Reset sample to zero state
@@ -337,6 +371,9 @@ export default function App() {
                 currentSample={currentSample}
                 onCustomImageUploaded={handleCustomImageUploaded}
                 onLoadDemoSample={handleLoadDemoSample}
+                onLoadCleanSample1={() => runRealTimeSimulation(CLEAN_WATER_SAMPLE_1)}
+                onLoadCleanSample2={() => runRealTimeSimulation(CLEAN_WATER_SAMPLE_2)}
+                onLoadContaminatedSample={() => runRealTimeSimulation(CONTAMINATED_SAMPLE_3)}
                 onStartAnalysis={() => setActiveTab('analysis')}
                 onResetSample={handleResetSample}
                 isAnalyzing={isAnalyzing}

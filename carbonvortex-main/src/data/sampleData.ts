@@ -1,11 +1,4 @@
 import { SampleData } from '../types';
-import {
-  CLEAN_WATER_IMG_UNDERWATER,
-  CLEAN_WATER_IMG_SEASHORE,
-  CLEAN_WATER_IMG_SPLASH,
-  CLEAN_WATER_IMG_BOTTLE,
-  CLEAN_WATER_IMG_GLASS,
-} from './cleanWaterImages';
 
 // High-fidelity scientific microscopic SVG previews generated as Data URIs for offline reliability
 const createMicroscopeSvg = (isTreated: boolean, sampleType: 'city' | 'marine' | 'textile') => {
@@ -79,211 +72,32 @@ const createMicroscopeSvg = (isTreated: boolean, sampleType: 'city' | 'marine' |
   }
 };
 
-export const SAMPLE_WALNUT_CONTAMINATED: SampleData = {
-  id: 'sample-walnut-carbon-01',
-  title: 'Şehir Şebeke Suyu & Mikroplastik Karışımı',
-  source: 'İstanbul Şebeke ve Sentetik PET/PE Çözeltisi',
-  description: 'Atık ceviz kabuğunun 750°C karbonizasyon ve doğal sitrik asit / buhar aktivasyonu ile gözenekli granüler aktif karbona dönüştürülmesi ve kolon filtrasyon testi.',
-  initialConcentration: 420, // adet/ml
-  treatedConcentration: 14, // adet/ml
-  efficiency: 96.66,
-  adsorptionCapacity: 48.7, // mg/g
-  activationType: 'Atık Ceviz Kabuğu Aktif Karbon Filtresi (GAC)',
-  activationDetails: 'Ceviz Kabuğu 750°C Karbonizasyon + %15 Limon/Sitrik Asit Gözenek Açma (BET: ~950 m²/g, İyot Sayısı: 1050 mg/g)',
-  turbidityBefore: 18.4,
-  turbidityAfter: 0.65,
-  betSurfaceArea: 950,
-  iodineNumber: 1050,
-  potabilityStatus: 'İÇİLEMEZ',
-  isDrinkable: false,
-  potabilityWarning: '🛑 KRİTİK SAĞLIK UYARISI: Ham numunede yüksek konsantrasyonda (420 adet/ml) mikroplastik partikülleri saptanmıştır. Bu su doğrudan KESİNLİKLE İÇİLEMEZ! DSÖ (WHO) ve Sağlık Bakanlığı standartlarına aykırıdır.',
-  microplasticRiskLevel: 'AŞIRI YÜKSEK',
-  beforeImage: createMicroscopeSvg(false, 'city'),
-  afterImage: createMicroscopeSvg(true, 'city'),
-  particles: [
-    {
-      id: 'p-1',
-      type: 'PET',
-      customLabel: 'PET Filaman',
-      sizeMicrons: 42.5,
-      x: 29.2,
-      y: 20.0,
-      shape: 'Lif (Fiber)',
-      capturedByBiochar: true,
-      confidence: 0.98,
-      color: '#ec4899',
-      notes: 'Tekstil mikro-lifi; ceviz kabuğu aktif karbonunun mikrogözeneklerinde pi-pi aromatik etkileşimiyle tutuldu.'
-    },
-    {
-      id: 'p-2',
-      type: 'PE',
-      customLabel: 'PE Parçacık',
-      sizeMicrons: 68.0,
-      x: 64.0,
-      y: 26.6,
-      shape: 'Parçacık (Fragment)',
-      capturedByBiochar: true,
-      confidence: 0.94,
-      color: '#3b82f6',
-      notes: 'Polietilen film parçası; aktif karbon mezogözeneklerinde fiziksel adsorpsiyonla hapsedildi.'
-    },
-    {
-      id: 'p-3',
-      type: 'PP',
-      customLabel: 'PP Elyaf',
-      sizeMicrons: 35.2,
-      x: 26.6,
-      y: 68.8,
-      shape: 'Lif (Fiber)',
-      capturedByBiochar: true,
-      confidence: 0.96,
-      color: '#f59e0b',
-      notes: 'Polipropilen ambalaj lifi; granüler aktif karbon kolon yatağında süzüldü.'
-    },
-    {
-      id: 'p-4',
-      type: 'PS',
-      customLabel: 'PS Mikro-Küre',
-      sizeMicrons: 110.4,
-      x: 55.0,
-      y: 55.5,
-      shape: 'Küre (Bead)',
-      capturedByBiochar: true,
-      confidence: 0.99,
-      color: '#a855f7',
-      notes: 'Polistiren mikro-küre; hidrofobik gözenek tutunması ile yakalandı.'
-    },
-    {
-      id: 'p-5',
-      type: 'PET',
-      customLabel: 'PET Parçacık',
-      sizeMicrons: 52.1,
-      x: 76.6,
-      y: 57.7,
-      shape: 'Parçacık (Fragment)',
-      capturedByBiochar: true,
-      confidence: 0.91,
-      color: '#ec4899',
-      notes: '2.4 nm gözenek boyutu ile karbon iç yüzeyinde dengeye ulaştı.'
-    },
-    {
-      id: 'p-6',
-      type: 'Naylon',
-      customLabel: 'Naylon Lif',
-      sizeMicrons: 28.0,
-      x: 38.3,
-      y: 53.3,
-      shape: 'Lif (Fiber)',
-      capturedByBiochar: true,
-      confidence: 0.89,
-      color: '#10b981',
-      notes: 'Poliamid lifi; aktif karbon yüzeyindeki oksijenli fonksiyonel gruplarla hidrojen bağı kurdu.'
-    },
-    {
-      id: 'p-7',
-      type: 'PVC',
-      customLabel: 'PVC Kırıntısı',
-      sizeMicrons: 84.6,
-      x: 45.0,
-      y: 24.4,
-      shape: 'Parçacık (Fragment)',
-      capturedByBiochar: true,
-      confidence: 0.95,
-      color: '#ef4444',
-      notes: 'Polivinil klorür parçacığı; filtre yatağında mekanik alıkoyma ile tutuldu.'
-    },
-    {
-      id: 'p-8',
-      type: 'PE',
-      customLabel: 'PE Mikro-Tanecik',
-      sizeMicrons: 19.5,
-      x: 35.0,
-      y: 31.1,
-      shape: 'Küre (Bead)',
-      capturedByBiochar: false,
-      confidence: 0.82,
-      color: '#38bdf8',
-      notes: 'Filtre sonrası serbest kalan nadir fraksiyon (<20µm).'
-    }
-  ],
-  kineticData: [
-    { timeMinutes: 0, concentration: 420, adsorption: 0.0 },
-    { timeMinutes: 5, concentration: 240, adsorption: 21.4 },
-    { timeMinutes: 10, concentration: 135, adsorption: 33.9 },
-    { timeMinutes: 20, concentration: 62, adsorption: 42.6 },
-    { timeMinutes: 30, concentration: 28, adsorption: 46.7 },
-    { timeMinutes: 45, concentration: 17, adsorption: 48.0 },
-    { timeMinutes: 60, concentration: 14, adsorption: 48.7 },
-  ],
-  sizeDistribution: [
-    { range: '< 25 µm', count: 4, percentage: 12 },
-    { range: '25 - 50 µm', count: 14, percentage: 41 },
-    { range: '50 - 100 µm', count: 11, percentage: 32 },
-    { range: '> 100 µm', count: 5, percentage: 15 },
-  ],
-  filterComparison: [
-    {
-      name: 'Ceviz Kabuğu Aktif Karbon (GAC)',
-      efficiency: 96.66,
-      adsorptionQe: 48.7,
-      flowRateMlMin: 35.0,
-      color: '#14b8a6'
-    },
-    {
-      name: 'Standart Piroliz Biyoçömür',
-      efficiency: 72.4,
-      adsorptionQe: 24.1,
-      flowRateMlMin: 45.0,
-      color: '#3b82f6'
-    },
-    {
-      name: 'Ham İşlenmemiş Ceviz Kabuğu Tozu',
-      efficiency: 29.8,
-      adsorptionQe: 8.3,
-      flowRateMlMin: 180.0,
-      color: '#64748b'
-    },
-    {
-      name: 'Ticari Kömür Bazlı Aktif Karbon',
-      efficiency: 84.2,
-      adsorptionQe: 36.5,
-      flowRateMlMin: 60.0,
-      color: '#8b5cf6'
-    }
-  ]
-};
-
-// 1. Bir Bardak Temiz İçme Suyu Numunesi (Kullanıcının yüklediği görsel)
-export const SAMPLE_CLEAN_GLASS: SampleData = {
-  id: 'sample-clean-glass-01',
-  title: 'Bir Bardak Berrak İçme Suyu (Sağlığa Tam Uygun)',
-  source: 'Filtrelenmiş Doğal İçme Suyu • Spektroskopik Tarama',
-  description: 'Görselde analiz edilen su son derece berrak, saf ve temizdir. FTIR lazer spektroskopisi ve derin öğrenme taramasında hiçbir mikroplastik partikülü, polimer lifi veya yabancı atık saptanmamıştır. Dünya Sağlık Örgütü (DSÖ) ve Sağlık Bakanlığı içme suyu standartlarına tam uygundur; insan sağlığı için güvenli ve içilebilirdir.',
+export const CLEAN_WATER_SAMPLE_1: SampleData = {
+  id: 'sample-clean-water-1',
+  title: 'Temiz İçme Suyu (Bardakta Berrak Su)',
+  source: 'Doğal Kaynak Şebeke Suyu • Optik Analiz Doğrulandı',
+  description: 'Görselde mikroplastik parçacığı, polimer lifi veya yabancı madde tespit edilmemiştir. Su berrak, şeffaf ve doğrudan içilebilir kalitededir.',
   initialConcentration: 0,
   treatedConcentration: 0,
   efficiency: 100.0,
   adsorptionCapacity: 0.0,
-  activationType: 'Doğal & Berrak İçme Suyu Kalitesi (TS 266 Standartı)',
-  activationDetails: 'Numune berrak ve saftır; ceviz kabuğu aktif karbon arıtımı gerektirmeyecek düzeyde mükemmel içme suyu saflığındadır.',
-  turbidityBefore: 0.32,
-  turbidityAfter: 0.22,
+  activationType: 'Doğal Saflık (Arıtma Gerektirmez)',
+  activationDetails: 'İçme suyu standartları: Bulanıklık 0.52 NTU (< 1.0 NTU DSÖ Limiti). Sağlığa zararlı polimer atığı bulunmamaktadır.',
+  turbidityBefore: 0.52,
+  turbidityAfter: 0.40,
   betSurfaceArea: 950,
   iodineNumber: 1050,
-  potabilityStatus: 'İÇİLEBİLİR (GÜVENLİ)',
+  potabilityStatus: 'İÇİLMEYE UYGUN',
   isDrinkable: true,
-  potabilityWarning: '✅ GÜVENLİ & İÇİLEBİLİR: Görsel analizde berrak, saf su tespit edilmiştir. Hiçbir mikroplastik lifi, polimer parçacığı veya kirlilik saptanmamıştır. Dünya Sağlık Örgütü (DSÖ) ve Sağlık Bakanlığı içme suyu standartlarına tam uygundur; insan sağlığı için güvenli ve içilebilir niteliktedir.',
+  potabilityWarning: '✅ Bu numune berrak, şeffaf ve güvenli içme suyudur. Mikroplastik parçacığı saptanmamıştır. DSÖ ve Sağlık Bakanlığı içme suyu standartlarına UYGUNDUR.',
   microplasticRiskLevel: 'TEMİZ',
-  beforeImage: CLEAN_WATER_IMG_GLASS,
-  afterImage: CLEAN_WATER_IMG_GLASS,
+  beforeImage: '/samples/temiz_su_1.png',
+  afterImage: '/samples/temiz_su_1.png',
   particles: [],
   kineticData: [
-    { timeMinutes: 0, concentration: 0, adsorption: 0 },
-    { timeMinutes: 5, concentration: 0, adsorption: 0 },
-    { timeMinutes: 10, concentration: 0, adsorption: 0 },
-    { timeMinutes: 20, concentration: 0, adsorption: 0 },
-    { timeMinutes: 30, concentration: 0, adsorption: 0 },
-    { timeMinutes: 45, concentration: 0, adsorption: 0 },
-    { timeMinutes: 60, concentration: 0, adsorption: 0 },
+    { timeMinutes: 0, concentration: 0, adsorption: 0.0 },
+    { timeMinutes: 30, concentration: 0, adsorption: 0.0 },
+    { timeMinutes: 60, concentration: 0, adsorption: 0.0 },
   ],
   sizeDistribution: [
     { range: '< 25 µm', count: 0, percentage: 0 },
@@ -293,232 +107,335 @@ export const SAMPLE_CLEAN_GLASS: SampleData = {
   ],
   filterComparison: [
     {
-      name: 'Temiz Su Kalitesi (TS 266 / DSÖ)',
+      name: 'Doğal Berrak Kaynak Suyu',
       efficiency: 100.0,
       adsorptionQe: 0.0,
-      flowRateMlMin: 35.0,
+      flowRateMlMin: 40.0,
       color: '#10b981',
     },
+  ],
+};
+
+export const CLEAN_WATER_SAMPLE_2: SampleData = {
+  id: 'sample-clean-water-2',
+  title: 'Taze Kaynak Suyu (Dökülen Berrak Su)',
+  source: 'Taze Doğal Su Kaynağı • Akışkan Berraklık Analizi',
+  description: 'Dökülen su akıntısında oluşan doğal hava kabarcıkları dışında hiçbir yabancı polimer veya mikroplastik kalıntısı bulunmamaktadır.',
+  initialConcentration: 0,
+  treatedConcentration: 0,
+  efficiency: 100.0,
+  adsorptionCapacity: 0.0,
+  activationType: 'Doğal Saflık (Arıtma Gerektirmez)',
+  activationDetails: 'İçme suyu parametreleri: Bulanıklık 0.48 NTU. Polimer kirliliği %0.0.',
+  turbidityBefore: 0.48,
+  turbidityAfter: 0.38,
+  betSurfaceArea: 950,
+  iodineNumber: 1050,
+  potabilityStatus: 'İÇİLMEYE UYGUN',
+  isDrinkable: true,
+  potabilityWarning: '✅ Bu numune berrak, şeffaf ve güvenli içme suyudur. Sıfır mikroplastik ile içme suyuna UYGUNDUR.',
+  microplasticRiskLevel: 'TEMİZ',
+  beforeImage: '/samples/temiz_su_2.png',
+  afterImage: '/samples/temiz_su_2.png',
+  particles: [],
+  kineticData: [
+    { timeMinutes: 0, concentration: 0, adsorption: 0.0 },
+    { timeMinutes: 30, concentration: 0, adsorption: 0.0 },
+    { timeMinutes: 60, concentration: 0, adsorption: 0.0 },
+  ],
+  sizeDistribution: [
+    { range: '< 25 µm', count: 0, percentage: 0 },
+    { range: '25 - 50 µm', count: 0, percentage: 0 },
+    { range: '50 - 100 µm', count: 0, percentage: 0 },
+    { range: '> 100 µm', count: 0, percentage: 0 },
+  ],
+  filterComparison: [
+    {
+      name: 'Taze Kaynak Suyu',
+      efficiency: 100.0,
+      adsorptionQe: 0.0,
+      flowRateMlMin: 45.0,
+      color: '#14b8a6',
+    },
+  ],
+};
+
+export const CONTAMINATED_SAMPLE_3: SampleData = {
+  id: 'sample-contaminated-3',
+  title: 'Mikroplastikli ve Şeffaf Parçacıklı Kirli Su',
+  source: 'Kentsel / Plastik Atıklı Su Numunesi (3. Görsel)',
+  description: 'Görselde çok sayıda şeffaf parçacık, polimer pulu ve renkli mikroplastik lifleri tespit edilmiştir. Doğrudan tüketilmesi tehlikelidir.',
+  initialConcentration: 240,
+  treatedConcentration: 8,
+  efficiency: 96.66,
+  adsorptionCapacity: 48.7,
+  activationType: 'Atık Ceviz Kabuğu Aktif Karbon Filtresi (GAC)',
+  activationDetails: 'Ceviz Kabuğu 750°C Karbonizasyon + %15 Sitrik Asit/Buhar (BET: ~950 m²/g)',
+  turbidityBefore: 12.8,
+  turbidityAfter: 0.58,
+  betSurfaceArea: 950,
+  iodineNumber: 1050,
+  potabilityStatus: 'İÇİLMEYE UYGUN DEĞİL',
+  isDrinkable: false,
+  potabilityWarning: '🛑 DİKKAT: Numunede şeffaf parçacıklar, mikroplastikler ve polimer kalıntıları saptanmıştır. Bulanıklık ve partikül yoğunluğu içme suyu sınırlarının üzerinde olduğu için İÇİLMEYE UYGUN DEĞİLDİR!',
+  microplasticRiskLevel: 'AŞIRI YÜKSEK',
+  beforeImage: '/samples/kirli_su_mikroplastik.png',
+  afterImage: '/samples/kirli_su_mikroplastik.png',
+  particles: [
+    {
+      id: 'p-c1',
+      type: 'PET',
+      customLabel: 'Şeffaf Polimer Pulu',
+      sizeMicrons: 48.0,
+      x: 35.0,
+      y: 42.0,
+      shape: 'Parçacık (Fragment)',
+      capturedByBiochar: true,
+      confidence: 0.96,
+      color: '#38bdf8',
+      notes: 'Şeffaf plastik parçacığı; ceviz kabuğu aktif karbonunun gözeneklerinde tutuldu.',
+    },
+    {
+      id: 'p-c2',
+      type: 'PP',
+      customLabel: 'PP Renkli Elyaf',
+      sizeMicrons: 62.0,
+      x: 52.0,
+      y: 38.0,
+      shape: 'Lif (Fiber)',
+      capturedByBiochar: true,
+      confidence: 0.94,
+      color: '#f59e0b',
+      notes: 'Polipropilen lifi; aktif karbon mezogözeneklerinde hapsedildi.',
+    },
+    {
+      id: 'p-c3',
+      type: 'PE',
+      customLabel: 'PE Mikro-Parçacık',
+      sizeMicrons: 75.0,
+      x: 46.0,
+      y: 65.0,
+      shape: 'Parçacık (Fragment)',
+      capturedByBiochar: true,
+      confidence: 0.95,
+      color: '#ef4444',
+      notes: 'Polietilen film döküntüsü.',
+    },
+    {
+      id: 'p-c4',
+      type: 'PS',
+      customLabel: 'PS Köpük Kalıntısı',
+      sizeMicrons: 38.0,
+      x: 62.0,
+      y: 54.0,
+      shape: 'Küre (Bead)',
+      capturedByBiochar: true,
+      confidence: 0.92,
+      color: '#a855f7',
+      notes: 'Mikroplastik küre; aktif karbon gözeneklerinde adsorbe edildi.',
+    },
+  ],
+  kineticData: [
+    { timeMinutes: 0, concentration: 240, adsorption: 0.0 },
+    { timeMinutes: 10, concentration: 95, adsorption: 29.5 },
+    { timeMinutes: 30, concentration: 22, adsorption: 44.8 },
+    { timeMinutes: 60, concentration: 8, adsorption: 48.7 },
+  ],
+  sizeDistribution: [
+    { range: '< 25 µm', count: 3, percentage: 15 },
+    { range: '25 - 50 µm', count: 8, percentage: 40 },
+    { range: '50 - 100 µm', count: 6, percentage: 30 },
+    { range: '> 100 µm', count: 3, percentage: 15 },
+  ],
+  filterComparison: [
     {
       name: 'Atık Ceviz Kabuğu Aktif Karbon (GAC)',
-      efficiency: 99.8,
+      efficiency: 96.66,
       adsorptionQe: 48.7,
       flowRateMlMin: 35.0,
       color: '#14b8a6',
     },
-    {
-      name: 'Standart Piroliz Biyoçömür',
-      efficiency: 72.4,
-      adsorptionQe: 24.1,
-      flowRateMlMin: 45.0,
-      color: '#3b82f6',
-    },
   ],
 };
-
-// 2. Şişelenmiş Saf Doğal Kaynak Suyu
-export const SAMPLE_CLEAN_BOTTLE: SampleData = {
-  id: 'sample-clean-bottle-02',
-  title: 'Şişelenmiş Saf Doğal Kaynak Suyu (Güvenli & İçilebilir)',
-  source: 'Ruhsatlı Doğal Kaynak Ambalajlı Su Numunesi',
-  description: 'Ambalajlı saf kaynak suyu görseli. Polimer göçü veya PET/PE mikro-parçacığı taraması yapılmış ve sıfır partikül tespit edilmiştir. İnsan sağlığı için tamamen güvenlidir.',
-  initialConcentration: 0,
-  treatedConcentration: 0,
-  efficiency: 100.0,
-  adsorptionCapacity: 0.0,
-  activationType: 'Ruhsatlı Doğal Kaynak Suyu Standartı',
-  activationDetails: 'Numune analizinde yabancı polimer veya bulanıklık saptanmamıştır; doğrudan tüketime uygundur.',
-  turbidityBefore: 0.28,
-  turbidityAfter: 0.20,
-  betSurfaceArea: 950,
-  iodineNumber: 1050,
-  potabilityStatus: 'İÇİLEBİLİR (GÜVENLİ)',
-  isDrinkable: true,
-  potabilityWarning: '✅ İÇİLEBİLİR (GÜVENLİ): Şişelenmiş su numunesinde mikroplastik kirliliği bulunmamaktadır. Sağlık Bakanlığı yönetmeliklerine ve insan sağlığına tam uygundur.',
-  microplasticRiskLevel: 'TEMİZ',
-  beforeImage: CLEAN_WATER_IMG_BOTTLE,
-  afterImage: CLEAN_WATER_IMG_BOTTLE,
-  particles: [],
-  kineticData: [
-    { timeMinutes: 0, concentration: 0, adsorption: 0 },
-    { timeMinutes: 60, concentration: 0, adsorption: 0 },
-  ],
-  sizeDistribution: [],
-  filterComparison: [
-    {
-      name: 'Kaynak Suyu Saflığı',
-      efficiency: 100.0,
-      adsorptionQe: 0.0,
-      flowRateMlMin: 35.0,
-      color: '#10b981',
-    },
-  ],
-};
-
-// 3. Saf Arıtılmış Su Damlası
-export const SAMPLE_CLEAN_SPLASH: SampleData = {
-  id: 'sample-clean-splash-03',
-  title: 'Saf Arıtılmış Su Damlası (Kristal Saflık)',
-  source: 'Aktif Karbon & Mikro-Filtrasyon Çıkış Havuzu',
-  description: 'Ceviz kabuğu aktif karbon kolonundan süzülen yüksek berraklıkta saf su damlacığı. Yüzey gerilimi ve optik kırılma katsayısı yüksek saflıktaki temiz su ile tam örtüşmektedir.',
-  initialConcentration: 0,
-  treatedConcentration: 0,
-  efficiency: 100.0,
-  adsorptionCapacity: 0.0,
-  activationType: 'Aktif Karbon Saflaştırma Süzüntüsü',
-  activationDetails: 'Mikro ve mezogözenek adsorpsiyonu tamamlanmış, partikülden tamamen arındırılmış saf çıkış suyu.',
-  turbidityBefore: 0.35,
-  turbidityAfter: 0.20,
-  betSurfaceArea: 950,
-  iodineNumber: 1050,
-  potabilityStatus: 'İÇİLEBİLİR (GÜVENLİ)',
-  isDrinkable: true,
-  potabilityWarning: '✅ KUSURSUZ İÇME SUYU: Atık ceviz kabuğu aktif karbon kolon filtrasyonu sonrası su tamamen saflaştırılmıştır. Sıfır mikroplastik, berrak ve insan sağlığı için tam uygundur.',
-  microplasticRiskLevel: 'TEMİZ',
-  beforeImage: CLEAN_WATER_IMG_SPLASH,
-  afterImage: CLEAN_WATER_IMG_SPLASH,
-  particles: [],
-  kineticData: [
-    { timeMinutes: 0, concentration: 0, adsorption: 0 },
-    { timeMinutes: 60, concentration: 0, adsorption: 0 },
-  ],
-  sizeDistribution: [],
-  filterComparison: [
-    {
-      name: 'Saf Su Çıkışı',
-      efficiency: 100.0,
-      adsorptionQe: 0.0,
-      flowRateMlMin: 35.0,
-      color: '#10b981',
-    },
-  ],
-};
-
-// 4. Berrak Doğal Kaynak Suyu (Sualtı)
-export const SAMPLE_CLEAN_UNDERWATER: SampleData = {
-  id: 'sample-clean-underwater-04',
-  title: 'Berrak Doğal Kaynak Suyu (Sualtı Derin Katman)',
-  source: 'Doğal Dağ Pınarı / Akifer Kaynak Suyu',
-  description: 'Sualtı güneş ışığı kırılımı ve hava kabarcıkları içeren berrak doğal su katmanı. Herhangi bir sentetik mikrofiber kirliliği veya sediment içermemektedir.',
-  initialConcentration: 0,
-  treatedConcentration: 0,
-  efficiency: 100.0,
-  adsorptionCapacity: 0.0,
-  activationType: 'Doğal Akifer Kaynak Suyu',
-  activationDetails: 'Yer altı doğal mineral filtrasyonundan geçmiş berrak ve temiz su yapısı.',
-  turbidityBefore: 0.40,
-  turbidityAfter: 0.25,
-  betSurfaceArea: 950,
-  iodineNumber: 1050,
-  potabilityStatus: 'İÇİLEBİLİR (GÜVENLİ)',
-  isDrinkable: true,
-  potabilityWarning: '✅ TEMİZ VE SAĞLIKLI: Doğal su kaynağı numunesi berrak ve temizdir. Görsel spektroskopik taramada mikroplastik bulunmamaktadır; insan tüketimi için güvenlidir.',
-  microplasticRiskLevel: 'TEMİZ',
-  beforeImage: CLEAN_WATER_IMG_UNDERWATER,
-  afterImage: CLEAN_WATER_IMG_UNDERWATER,
-  particles: [],
-  kineticData: [
-    { timeMinutes: 0, concentration: 0, adsorption: 0 },
-    { timeMinutes: 60, concentration: 0, adsorption: 0 },
-  ],
-  sizeDistribution: [],
-  filterComparison: [],
-};
-
-// 5. Kristal Berraklığında Doğal Kıyı Suyu
-export const SAMPLE_CLEAN_SEASHORE: SampleData = {
-  id: 'sample-clean-seashore-05',
-  title: 'Kristal Berraklığında Doğal Kıyı Suyu',
-  source: 'Koruma Altındaki Doğal Taşlık Kıyı Katmanı',
-  description: 'Çakıl taşlarının net olarak görülebildiği kristal berraklığında doğal su örneği. Yüzeyde plastik atık, yüzen polimer veya köpük bulunmamaktadır.',
-  initialConcentration: 0,
-  treatedConcentration: 0,
-  efficiency: 100.0,
-  adsorptionCapacity: 0.0,
-  activationType: 'Doğal Berrak Yüzey Suyu',
-  activationDetails: 'Gözlemlenebilir sediment ve mikroplastik bulunmayan kristal berrak su ortamı.',
-  turbidityBefore: 0.45,
-  turbidityAfter: 0.30,
-  betSurfaceArea: 950,
-  iodineNumber: 1050,
-  potabilityStatus: 'İÇİLEBİLİR (GÜVENLİ)',
-  isDrinkable: true,
-  potabilityWarning: '✅ BERRAK VE TEMİZ: Görselde analiz edilen su berrak ve temizdir; mikroplastik kirliliği bulunmamaktadır. İnsan sağlığı için uygun ve güvenlidir.',
-  microplasticRiskLevel: 'TEMİZ',
-  beforeImage: CLEAN_WATER_IMG_SEASHORE,
-  afterImage: CLEAN_WATER_IMG_SEASHORE,
-  particles: [],
-  kineticData: [
-    { timeMinutes: 0, concentration: 0, adsorption: 0 },
-    { timeMinutes: 60, concentration: 0, adsorption: 0 },
-  ],
-  sizeDistribution: [],
-  filterComparison: [],
-};
-
-export const CLEAN_WATER_SAMPLES: SampleData[] = [
-  SAMPLE_CLEAN_GLASS,
-  SAMPLE_CLEAN_BOTTLE,
-  SAMPLE_CLEAN_SPLASH,
-  SAMPLE_CLEAN_UNDERWATER,
-  SAMPLE_CLEAN_SEASHORE,
-];
 
 export const INITIAL_SAMPLES: SampleData[] = [
-  SAMPLE_CLEAN_GLASS,
-  SAMPLE_CLEAN_BOTTLE,
-  SAMPLE_CLEAN_SPLASH,
-  SAMPLE_CLEAN_UNDERWATER,
-  SAMPLE_CLEAN_SEASHORE,
-  SAMPLE_WALNUT_CONTAMINATED,
+  CLEAN_WATER_SAMPLE_1,
+  CLEAN_WATER_SAMPLE_2,
+  CONTAMINATED_SAMPLE_3,
+  {
+    id: 'sample-walnut-carbon-01',
+    title: 'Şehir Şebeke Suyu & Mikroplastik Karışımı (Laboratuvar)',
+    source: 'İstanbul Şebeke ve Sentetik PET/PE Çözeltisi',
+    description: 'Atık ceviz kabuğunun 750°C karbonizasyon ve doğal sitrik asit / buhar aktivasyonu ile gözenekli granüler aktif karbona dönüştürülmesi ve kolon filtrasyon testi.',
+    initialConcentration: 420, // adet/ml
+    treatedConcentration: 14, // adet/ml
+    efficiency: 96.66,
+    adsorptionCapacity: 48.7, // mg/g
+    activationType: 'Atık Ceviz Kabuğu Aktif Karbon Filtresi (GAC)',
+    activationDetails: 'Ceviz Kabuğu 750°C Karbonizasyon + %15 Limon/Sitrik Asit Gözenek Açma (BET: ~950 m²/g, İyot Sayısı: 1050 mg/g)',
+    turbidityBefore: 18.4,
+    turbidityAfter: 0.65,
+    betSurfaceArea: 950,
+    iodineNumber: 1050,
+    potabilityStatus: 'İÇİLMEYE UYGUN DEĞİL',
+    isDrinkable: false,
+    potabilityWarning: '🛑 KRİTİK SAĞLIK UYARISI: Ham numunede yüksek konsantrasyonda (420 adet/ml) mikroplastik partikülleri saptanmıştır. Bu su doğrudan KESİNLİKLE İÇİLEMEZ! DSÖ (WHO) ve Sağlık Bakanlığı standartlarına aykırıdır.',
+    microplasticRiskLevel: 'AŞIRI YÜKSEK',
+    beforeImage: createMicroscopeSvg(false, 'city'),
+    afterImage: createMicroscopeSvg(true, 'city'),
+    particles: [
+      {
+        id: 'p-1',
+        type: 'PET',
+        customLabel: 'PET Filaman',
+        sizeMicrons: 42.5,
+        x: 29.2,
+        y: 20.0,
+        shape: 'Lif (Fiber)',
+        capturedByBiochar: true,
+        confidence: 0.98,
+        color: '#ec4899',
+        notes: 'Tekstil mikro-lifi; ceviz kabuğu aktif karbonunun mikrogözeneklerinde pi-pi aromatik etkileşimiyle tutuldu.'
+      },
+      {
+        id: 'p-2',
+        type: 'PE',
+        customLabel: 'PE Parçacık',
+        sizeMicrons: 68.0,
+        x: 64.0,
+        y: 26.6,
+        shape: 'Parçacık (Fragment)',
+        capturedByBiochar: true,
+        confidence: 0.94,
+        color: '#3b82f6',
+        notes: 'Polietilen film parçası; aktif karbon mezogözeneklerinde fiziksel adsorpsiyonla hapsedildi.'
+      },
+      {
+        id: 'p-3',
+        type: 'PP',
+        customLabel: 'PP Elyaf',
+        sizeMicrons: 35.2,
+        x: 26.6,
+        y: 68.8,
+        shape: 'Lif (Fiber)',
+        capturedByBiochar: true,
+        confidence: 0.96,
+        color: '#f59e0b',
+        notes: 'Polipropilen ambalaj lifi; granüler aktif karbon kolon yatağında süzüldü.'
+      },
+      {
+        id: 'p-4',
+        type: 'PS',
+        customLabel: 'PS Mikro-Küre',
+        sizeMicrons: 110.4,
+        x: 55.0,
+        y: 55.5,
+        shape: 'Küre (Bead)',
+        capturedByBiochar: true,
+        confidence: 0.99,
+        color: '#a855f7',
+        notes: 'Polistiren mikro-küre; hidrofobik gözenek tutunması ile yakalandı.'
+      },
+      {
+        id: 'p-5',
+        type: 'PET',
+        customLabel: 'PET Parçacık',
+        sizeMicrons: 52.1,
+        x: 76.6,
+        y: 57.7,
+        shape: 'Parçacık (Fragment)',
+        capturedByBiochar: true,
+        confidence: 0.91,
+        color: '#ec4899',
+        notes: '2.4 nm gözenek boyutu ile karbon iç yüzeyinde dengeye ulaştı.'
+      },
+      {
+        id: 'p-6',
+        type: 'Naylon',
+        customLabel: 'Naylon Lif',
+        sizeMicrons: 28.0,
+        x: 38.3,
+        y: 53.3,
+        shape: 'Lif (Fiber)',
+        capturedByBiochar: true,
+        confidence: 0.89,
+        color: '#10b981',
+        notes: 'Poliamid lifi; aktif karbon yüzeyindeki oksijenli fonksiyonel gruplarla hidrojen bağı kurdu.'
+      },
+      {
+        id: 'p-7',
+        type: 'PVC',
+        customLabel: 'PVC Kırıntısı',
+        sizeMicrons: 84.6,
+        x: 45.0,
+        y: 24.4,
+        shape: 'Parçacık (Fragment)',
+        capturedByBiochar: true,
+        confidence: 0.95,
+        color: '#ef4444',
+        notes: 'Polivinil klorür parçacığı; filtre yatağında mekanik alıkoyma ile tutuldu.'
+      },
+      {
+        id: 'p-8',
+        type: 'PE',
+        customLabel: 'PE Mikro-Tanecik',
+        sizeMicrons: 19.5,
+        x: 35.0,
+        y: 31.1,
+        shape: 'Küre (Bead)',
+        capturedByBiochar: false,
+        confidence: 0.82,
+        color: '#38bdf8',
+        notes: 'Filtre sonrası serbest kalan nadir fraksiyon (<20µm).'
+      }
+    ],
+    kineticData: [
+      { timeMinutes: 0, concentration: 420, adsorption: 0.0 },
+      { timeMinutes: 5, concentration: 240, adsorption: 21.4 },
+      { timeMinutes: 10, concentration: 135, adsorption: 33.9 },
+      { timeMinutes: 20, concentration: 62, adsorption: 42.6 },
+      { timeMinutes: 30, concentration: 28, adsorption: 46.7 },
+      { timeMinutes: 45, concentration: 17, adsorption: 48.0 },
+      { timeMinutes: 60, concentration: 14, adsorption: 48.7 },
+    ],
+    sizeDistribution: [
+      { range: '< 25 µm', count: 4, percentage: 12 },
+      { range: '25 - 50 µm', count: 14, percentage: 41 },
+      { range: '50 - 100 µm', count: 11, percentage: 32 },
+      { range: '> 100 µm', count: 5, percentage: 15 },
+    ],
+    filterComparison: [
+      {
+        name: 'Ceviz Kabuğu Aktif Karbon (GAC)',
+        efficiency: 96.66,
+        adsorptionQe: 48.7,
+        flowRateMlMin: 35.0,
+        color: '#14b8a6'
+      },
+      {
+        name: 'Standart Piroliz Biyoçömür',
+        efficiency: 72.4,
+        adsorptionQe: 24.1,
+        flowRateMlMin: 45.0,
+        color: '#3b82f6'
+      },
+      {
+        name: 'Ham İşlenmemiş Ceviz Kabuğu Tozu',
+        efficiency: 29.8,
+        adsorptionQe: 8.3,
+        flowRateMlMin: 180.0,
+        color: '#64748b'
+      },
+      {
+        name: 'Ticari Kömür Bazlı Aktif Karbon',
+        efficiency: 84.2,
+        adsorptionQe: 36.5,
+        flowRateMlMin: 60.0,
+        color: '#8b5cf6'
+      }
+    ]
+  }
 ];
-
-export interface CleanWaterPreset {
-  id: string;
-  name: string;
-  shortDesc: string;
-  image: string;
-  sample: SampleData;
-}
-
-export const CLEAN_WATER_PRESETS: CleanWaterPreset[] = [
-  {
-    id: 'preset-glass',
-    name: 'Bir Bardak Temiz Su',
-    shortDesc: 'Berrak, saf ve doğrudan içilebilir',
-    image: CLEAN_WATER_IMG_GLASS,
-    sample: SAMPLE_CLEAN_GLASS,
-  },
-  {
-    id: 'preset-bottle',
-    name: 'Şişelenmiş Kaynak Suyu',
-    shortDesc: 'Sıfır mikroplastik, içme suyu onaylı',
-    image: CLEAN_WATER_IMG_BOTTLE,
-    sample: SAMPLE_CLEAN_BOTTLE,
-  },
-  {
-    id: 'preset-splash',
-    name: 'Saf Arıtılmış Su Damlası',
-    shortDesc: 'Yüksek berraklık ve ideal saflık',
-    image: CLEAN_WATER_IMG_SPLASH,
-    sample: SAMPLE_CLEAN_SPLASH,
-  },
-  {
-    id: 'preset-underwater',
-    name: 'Doğal Kaynak Suyu (Sualtı)',
-    shortDesc: 'Berrak kaynak suyu katmanı',
-    image: CLEAN_WATER_IMG_UNDERWATER,
-    sample: SAMPLE_CLEAN_UNDERWATER,
-  },
-  {
-    id: 'preset-seashore',
-    name: 'Berrak Doğal Su',
-    shortDesc: 'Doğal kirliliksiz kristal su tabakası',
-    image: CLEAN_WATER_IMG_SEASHORE,
-    sample: SAMPLE_CLEAN_SEASHORE,
-  },
-];
-
 
 export const TUBITAK_PROJECT_INFO = {
   projectNumber: "2204-A / 2209-A TÜBİTAK AR-GE PROJESİ",

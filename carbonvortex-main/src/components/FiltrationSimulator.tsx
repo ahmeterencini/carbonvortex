@@ -267,14 +267,24 @@ export const FiltrationSimulator: React.FC<FiltrationSimulatorProps> = ({
         {/* Viewport 1: Column Filtration Simulation */}
         {viewMode === 'column' ? (
           <div className="relative w-full aspect-[4/3] sm:aspect-[16/9] max-h-[460px] rounded-xl overflow-hidden border border-slate-700/80 bg-slate-950 shadow-inner flex flex-col justify-between">
-            {/* Top Zone: Raw Polluted Water Inflow */}
-            <div className="h-24 bg-gradient-to-b from-rose-950/40 via-amber-950/20 to-transparent flex items-start justify-between p-4 z-10 pointer-events-none">
+            {/* Top Zone: Raw Polluted Water Inflow or Clean Water Inflow */}
+            <div className={`h-24 bg-gradient-to-b flex items-start justify-between p-4 z-10 pointer-events-none ${
+              sample.isDrinkable
+                ? 'from-emerald-950/40 via-teal-950/20 to-transparent'
+                : 'from-rose-950/40 via-amber-950/20 to-transparent'
+            }`}>
               <div>
-                <span className="text-[10px] font-mono text-rose-300 bg-rose-950/80 px-2 py-0.5 rounded border border-rose-800/40 block w-max">
-                  GİRİŞ: Ham Kirli Su
+                <span className={`text-[10px] font-mono px-2 py-0.5 rounded border block w-max ${
+                  sample.isDrinkable
+                    ? 'text-emerald-300 bg-emerald-950/80 border-emerald-800/40'
+                    : 'text-rose-300 bg-rose-950/80 border-rose-800/40'
+                }`}>
+                  {sample.isDrinkable ? 'GİRİŞ: Berrak Temiz Su (İçilmeye Uygun)' : 'GİRİŞ: Ham Kirli Su'}
                 </span>
                 <span className="text-[10px] text-slate-400 mt-1 block">
-                  Mikroplastik Yoğunluğu: {sample.initialConcentration} adet/ml
+                  {sample.isDrinkable
+                    ? 'Mikroplastik Yoğunluğu: 0 adet/ml (Temiz Su)'
+                    : `Mikroplastik Yoğunluğu: ${sample.initialConcentration} adet/ml`}
                 </span>
               </div>
 
@@ -322,10 +332,12 @@ export const FiltrationSimulator: React.FC<FiltrationSimulatorProps> = ({
             <div className="h-24 bg-gradient-to-t from-teal-950/60 to-transparent flex items-end justify-between p-4 z-10 pointer-events-none">
               <div>
                 <span className="text-[10px] font-mono text-emerald-300 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800/40 block w-max">
-                  ÇIKIŞ: Süzülmüş Berrak Su
+                  {sample.isDrinkable ? 'ÇIKIŞ: Güvenli İçme Suyu Kalitesi' : 'ÇIKIŞ: Süzülmüş Berrak Su'}
                 </span>
                 <span className="text-[10px] text-slate-400 mt-1 block">
-                  Mikroplastiklerden %{sample.efficiency.toFixed(1)} Arındırıldı ({sample.treatedConcentration} adet/ml kaldı)
+                  {sample.isDrinkable
+                    ? 'Temiz su numunesi; DSÖ ve Sağlık Bakanlığı standartlarına tam uygundur.'
+                    : `Mikroplastiklerden %${sample.efficiency.toFixed(1)} Arındırıldı (${sample.treatedConcentration} adet/ml kaldı)`}
                 </span>
               </div>
 

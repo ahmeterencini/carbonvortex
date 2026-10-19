@@ -20,6 +20,9 @@ interface UploadViewProps {
   currentSample: SampleData | null;
   onCustomImageUploaded: (file: File) => void;
   onLoadDemoSample: () => void;
+  onLoadCleanSample1?: () => void;
+  onLoadCleanSample2?: () => void;
+  onLoadContaminatedSample?: () => void;
   onStartAnalysis: () => void;
   onResetSample?: () => void;
   isAnalyzing: boolean;
@@ -31,6 +34,9 @@ export const UploadView: React.FC<UploadViewProps> = ({
   currentSample,
   onCustomImageUploaded,
   onLoadDemoSample,
+  onLoadCleanSample1,
+  onLoadCleanSample2,
+  onLoadContaminatedSample,
   onStartAnalysis,
   onResetSample,
   isAnalyzing,
@@ -254,53 +260,178 @@ export const UploadView: React.FC<UploadViewProps> = ({
           </div>
         </div>
 
-        {/* Demo Sample Loader Button (Explicitly requested by user) */}
-        <div className="mt-4 pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-950/40 p-3.5 rounded-xl border border-slate-800/60">
-          <div className="flex items-center gap-2.5">
-            <FlaskConical className="w-5 h-5 text-amber-400 shrink-0" />
-            <div>
-              <h4 className="text-xs font-bold text-slate-200">
-                Fotoğrafınız Yok mu? Gerçekçi Laboratuvar Test Numunesi Yükleyin
-              </h4>
-              <p className="text-[11px] text-slate-400">
-                Atık ceviz kabuğundan üretilen gözenekli aktif karbon filtresinin adsorpsiyon verisini simüle eder.
-              </p>
-            </div>
+        {/* Quick Test Samples (1. ve 2. Görsel: Temiz Su / 3. Görsel: Mikroplastikli Su) */}
+        <div className="mt-4 pt-4 border-t border-slate-800/80">
+          <div className="flex items-center justify-between mb-2.5">
+            <h4 className="text-xs font-bold text-slate-200 flex items-center gap-1.5 font-mono">
+              <Sparkles className="w-3.5 h-3.5 text-teal-400" />
+              <span>Hızlı Numune Testleri (Temiz vs Kirli Su Örnekleri)</span>
+            </h4>
+            <span className="text-[10px] text-slate-400 font-mono">
+              Kullanıcı görselleri ile tek tıkla test edin
+            </span>
           </div>
 
-          <button
-            type="button"
-            onClick={onLoadDemoSample}
-            disabled={isAnalyzing}
-            className="w-full sm:w-auto px-4 py-2 rounded-xl bg-gradient-to-r from-teal-600/90 to-emerald-600/90 hover:from-teal-500 hover:to-emerald-500 disabled:opacity-50 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-teal-500/20 transition whitespace-nowrap"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Örnek Veri Yükle</span>
-          </button>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            {/* Numune 1: Temiz Su */}
+            <div
+              onClick={onLoadCleanSample1}
+              className="group cursor-pointer rounded-xl bg-slate-950/70 hover:bg-slate-950 p-2.5 border border-emerald-500/30 hover:border-emerald-400 transition flex items-center gap-2.5 shadow-sm"
+            >
+              <div className="w-12 h-12 rounded-lg overflow-hidden border border-emerald-500/40 shrink-0 bg-slate-900">
+                <img
+                  src="/samples/temiz_su_1.png"
+                  alt="Temiz Su 1"
+                  className="w-full h-full object-cover group-hover:scale-110 transition"
+                />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1">
+                  <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/50">
+                    İÇİLMEYE UYGUN
+                  </span>
+                </div>
+                <div className="text-xs font-bold text-white truncate mt-0.5">
+                  1. Görsel: Bardakta Berrak Su
+                </div>
+                <div className="text-[10px] text-slate-400 font-mono">
+                  Sıfır mikroplastik • Temiz
+                </div>
+              </div>
+            </div>
+
+            {/* Numune 2: Dökülen Temiz Su */}
+            <div
+              onClick={onLoadCleanSample2}
+              className="group cursor-pointer rounded-xl bg-slate-950/70 hover:bg-slate-950 p-2.5 border border-emerald-500/30 hover:border-emerald-400 transition flex items-center gap-2.5 shadow-sm"
+            >
+              <div className="w-12 h-12 rounded-lg overflow-hidden border border-emerald-500/40 shrink-0 bg-slate-900">
+                <img
+                  src="/samples/temiz_su_2.png"
+                  alt="Temiz Su 2"
+                  className="w-full h-full object-cover group-hover:scale-110 transition"
+                />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1">
+                  <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/50">
+                    İÇİLMEYE UYGUN
+                  </span>
+                </div>
+                <div className="text-xs font-bold text-white truncate mt-0.5">
+                  2. Görsel: Taze Dökülen Su
+                </div>
+                <div className="text-[10px] text-slate-400 font-mono">
+                  Doğal kaynak akışı • Saf
+                </div>
+              </div>
+            </div>
+
+            {/* Numune 3: Mikroplastikli Kirli Su */}
+            <div
+              onClick={onLoadContaminatedSample}
+              className="group cursor-pointer rounded-xl bg-slate-950/70 hover:bg-slate-950 p-2.5 border border-rose-500/40 hover:border-rose-400 transition flex items-center gap-2.5 shadow-sm"
+            >
+              <div className="w-12 h-12 rounded-lg overflow-hidden border border-rose-500/50 shrink-0 bg-slate-900">
+                <img
+                  src="/samples/kirli_su_mikroplastik.png"
+                  alt="Mikroplastikli Su"
+                  className="w-full h-full object-cover group-hover:scale-110 transition"
+                />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1">
+                  <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-rose-950 text-rose-300 border border-rose-600/60">
+                    İÇİLMEYE UYGUN DEĞİL
+                  </span>
+                </div>
+                <div className="text-xs font-bold text-white truncate mt-0.5">
+                  3. Görsel: Mikroplastikli Su
+                </div>
+                <div className="text-[10px] text-rose-300 font-mono">
+                  Şeffaf parçacıklar • Kirli
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Dirty water potability alert */}
-      {currentSample && !currentSample.isDrinkable && (
-        <div className="bg-gradient-to-r from-rose-950 via-slate-900 to-rose-950 border-2 border-rose-500 rounded-2xl p-4 shadow-xl">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-rose-950 border border-rose-500 flex items-center justify-center text-rose-400 shrink-0">
-              <AlertCircle className="w-5 h-5 animate-pulse" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-black uppercase text-rose-300">
-                  🛑 NUMUNE DURUMU: KESİNLİKLE İÇİLEMEZ
-                </span>
-                <span className="text-[10px] font-mono px-2 py-0.2 rounded bg-black/60 text-rose-400 border border-rose-800">
-                  {currentSample.microplasticRiskLevel || 'AŞIRI YÜKSEK MİKROPLASTİK'}
-                </span>
+      {/* Prominent Potability Status Display (İçilmeye Uygun vs İçilmeye Uygun Değil) */}
+      {currentSample && currentSample.isDrinkable && (
+        <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 border-2 border-emerald-400 rounded-2xl p-4 sm:p-5 shadow-2xl animate-in zoom-in-95 duration-200">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-start gap-3.5">
+              <div className="w-11 h-11 rounded-2xl bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-emerald-300 shadow-lg shadow-emerald-500/30 shrink-0">
+                <CheckCircle className="w-6 h-6" />
               </div>
-              <p className="text-xs text-slate-300 mt-0.5">
-                {currentSample.potabilityWarning ||
-                  'Bu görselde yoğun mikroplastik atıkları saptanmıştır. Tüketilmesi sağlık açısından tehlikelidir, içme suyuna uygun değildir.'}
-              </p>
+              <div>
+                <div className="flex flex-wrap items-center gap-2 mb-1">
+                  <span className="text-xs sm:text-sm font-black uppercase text-emerald-300 tracking-wider flex items-center gap-1.5">
+                    ✅ NUMUNE DURUMU: İÇİLMEYE UYGUN
+                  </span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-900/80 text-emerald-300 border border-emerald-500 font-bold">
+                    DSÖ (WHO) İÇME SUYU STANDARTLARINA UYGUN
+                  </span>
+                </div>
+                <p className="text-xs sm:text-sm text-slate-200 font-medium">
+                  {currentSample.potabilityWarning ||
+                    'Bu görselde zararlı mikroplastik parçacığı, polimer lifi veya bulanıklık saptanmamıştır. Su berrak, şeffaf ve güvenle tüketilebilir.'}
+                </p>
+                <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] font-mono text-emerald-300">
+                  <span>• Mikroplastik Yoğunluğu: <strong>0 adet/ml (Sıfır Risk)</strong></span>
+                  <span>• Bulanıklık: <strong>{currentSample.turbidityBefore} NTU</strong> (İçme limiti &lt; 1.0)</span>
+                  <span>• Tüketim Güvenliği: <strong>Tam Onaylı (Temiz & Güvenli Su)</strong></span>
+                </div>
+              </div>
             </div>
+
+            <button
+              onClick={onStartAnalysis}
+              className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/30 shrink-0 self-stretch sm:self-auto justify-center transition"
+            >
+              <span>Spektroskopiye Git</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {currentSample && !currentSample.isDrinkable && (
+        <div className="bg-gradient-to-r from-rose-950 via-slate-900 to-rose-950 border-2 border-rose-500 rounded-2xl p-4 sm:p-5 shadow-2xl animate-in zoom-in-95 duration-200">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-start gap-3.5">
+              <div className="w-11 h-11 rounded-2xl bg-rose-950 border-2 border-rose-500 flex items-center justify-center text-rose-400 shadow-lg shadow-rose-950/50 shrink-0">
+                <AlertCircle className="w-6 h-6 animate-pulse" />
+              </div>
+              <div>
+                <div className="flex flex-wrap items-center gap-2 mb-1">
+                  <span className="text-xs sm:text-sm font-black uppercase text-rose-300 tracking-wider">
+                    🛑 NUMUNE DURUMU: İÇİLMEYE UYGUN DEĞİL
+                  </span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-black/60 text-rose-400 border border-rose-800 font-bold">
+                    {currentSample.microplasticRiskLevel || 'MİKROPLASTİK TESPİT EDİLDİ'}
+                  </span>
+                </div>
+                <p className="text-xs sm:text-sm text-slate-200 font-medium">
+                  {currentSample.potabilityWarning ||
+                    'Numunede şeffaf parçacıklar, mikroplastik polimer lifleri ve yüksek bulanıklık saptanmıştır. Doğrudan tüketilmesi sağlık açısından uygun değildir.'}
+                </p>
+                <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] font-mono text-rose-300">
+                  <span>• Tespit Edilen Parçacık: <strong>{currentSample.initialConcentration} adet/ml</strong></span>
+                  <span>• Bulanıklık: <strong>{currentSample.turbidityBefore} NTU</strong></span>
+                  <span>• Öneri: <strong>Ceviz Kabuğu Aktif Karbon ile Filtreleyin</strong></span>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={onStartAnalysis}
+              className="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-rose-950/50 shrink-0 self-stretch sm:self-auto justify-center transition"
+            >
+              <span>Spektroskopiye Git</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
       )}
@@ -388,11 +519,27 @@ export const UploadView: React.FC<UploadViewProps> = ({
             </div>
 
             {/* Badges on left/right for clarity */}
-            <div className="absolute top-3 left-3 z-10 px-2.5 py-1 rounded-md bg-rose-950/90 border border-rose-500/60 text-[11px] font-bold text-rose-300 backdrop-blur-sm pointer-events-none">
-              ÖNCE: Ham Kirli Su (❌ İÇİLEMEZ)
+            <div
+              className={`absolute top-3 left-3 z-10 px-2.5 py-1 rounded-md border text-[11px] font-bold backdrop-blur-sm pointer-events-none ${
+                currentSample.isDrinkable
+                  ? 'bg-emerald-950/90 border-emerald-500/60 text-emerald-300'
+                  : 'bg-rose-950/90 border-rose-500/60 text-rose-300'
+              }`}
+            >
+              {currentSample.isDrinkable
+                ? 'ÖNCE: Berrak Su (✅ İÇİLMEYE UYGUN)'
+                : 'ÖNCE: Ham Su (❌ İÇİLMEYE UYGUN DEĞİL)'}
             </div>
-            <div className="absolute top-3 right-3 z-10 px-2.5 py-1 rounded-md bg-teal-950/90 border border-teal-500/60 text-[11px] font-bold text-teal-300 backdrop-blur-sm pointer-events-none">
-              SONRA: Ceviz Kabuğu Aktif Karbon (Ön Arıtılmış)
+            <div
+              className={`absolute top-3 right-3 z-10 px-2.5 py-1 rounded-md border text-[11px] font-bold backdrop-blur-sm pointer-events-none ${
+                currentSample.isDrinkable
+                  ? 'bg-emerald-950/90 border-emerald-500/60 text-emerald-300'
+                  : 'bg-teal-950/90 border-teal-500/60 text-teal-300'
+              }`}
+            >
+              {currentSample.isDrinkable
+                ? 'SONRA: Doğal Saflık Korundu (%100 İçilebilir)'
+                : 'SONRA: Ceviz Kabuğu Aktif Karbon (Ön Arıtılmış)'}
             </div>
 
             <div className="absolute bottom-3 left-3 z-10 px-2.5 py-1 rounded-md bg-black/70 text-[11px] font-mono text-slate-300 backdrop-blur-sm pointer-events-none">

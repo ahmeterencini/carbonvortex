@@ -22,6 +22,12 @@ import {
 } from 'lucide-react';
 import { SampleData, MicroplasticParticle } from '../types';
 import { calculateDynamicSampleData, DEFAULT_CARBON_PARAMS } from '../utils/adsorptionCalculator';
+import {
+  CLEAN_WATER_SAMPLE_1,
+  CLEAN_WATER_SAMPLE_2,
+  CONTAMINATED_SAMPLE_3,
+} from '../data/sampleData';
+import { analyzeWaterImageRealtime } from '../utils/realtimeWaterAI';
 
 interface ComparisonViewProps {
   sample: SampleData | null;
@@ -40,7 +46,7 @@ interface DataSlot {
   particles: MicroplasticParticle[];
   turbidity: number;
   isDrinkable: boolean;
-  potabilityStatus: 'İÇİLEMEZ' | 'ŞARTLI' | 'İÇİLEBİLİR';
+  potabilityStatus: 'İÇİLMEYE UYGUN' | 'İÇİLMEYE UYGUN DEĞİL' | 'İÇİLEMEZ' | 'ŞARTLI' | 'İÇİLEBİLİR' | 'SU NUMUNESİ DEĞİL';
   potabilityWarning: string;
   microplasticRiskLevel: 'AŞIRI YÜKSEK' | 'YÜKSEK' | 'ORTA' | 'DÜŞÜK' | 'TEMİZ';
 }
@@ -59,28 +65,39 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
   // Slot 1: Ham / Kirli Su (Arıtma Öncesi)
   const [rawSlot, setRawSlot] = useState<DataSlot>(() => {
     if (sample) {
+      const isClean =
+        sample.isDrinkable === true ||
+        sample.potabilityStatus === 'İÇİLMEYE UYGUN' ||
+        sample.potabilityStatus === 'İÇİLEBİLİR';
       const isDirty =
-        sample.particles.length >= 4 ||
-        sample.initialConcentration > 25 ||
-        sample.turbidityBefore > 4.0 ||
-        sample.potabilityStatus === 'İÇİLEMEZ';
+        !isClean &&
+        (sample.particles.length >= 4 ||
+          sample.initialConcentration > 25 ||
+          sample.turbidityBefore > 4.0 ||
+          sample.potabilityStatus === 'İÇİLEMEZ' ||
+          sample.potabilityStatus === 'İÇİLMEYE UYGUN DEĞİL');
 
       return {
         isLoaded: true,
         image: sample.beforeImage,
-        title: sample.title || '1. Veri: Ham Su Numunesi',
-        particleCount: sample.initialConcentration,
-        particles: sample.particles,
+        title: sample.title || (isClean ? '1. Veri: Temiz İçme Suyu' : '1. Veri: Ham Su Numunesi'),
+        particleCount: isClean ? 0 : sample.initialConcentration,
+        particles: isClean ? [] : sample.particles,
         turbidity: sample.turbidityBefore,
-        isDrinkable: sample.isDrinkable ?? !isDirty,
-        potabilityStatus: sample.potabilityStatus || (isDirty ? 'İÇİLEMEZ' : 'ŞARTLI'),
+        isDrinkable: isClean,
+        potabilityStatus: isClean
+          ? 'İÇİLMEYE UYGUN'
+          : sample.potabilityStatus || (isDirty ? 'İÇİLMEYE UYGUN DEĞİL' : 'ŞARTLI'),
         potabilityWarning:
           sample.potabilityWarning ||
-          (isDirty
+          (isClean
+            ? '✅ İÇİLMEYE UYGUN: Görselde şeffaf parçacık veya mikroplastik saptanmamıştır. DSÖ ve Sağlık Bakanlığı içme suyu standartlarına UYGUNDUR.'
+            : isDirty
             ? '🛑 KRİTİK SAĞLIK UYARISI: Bu su numunesi yüksek mikroplastik konsantrasyonu ve kirlilik içerir. KESİNLİKLE İÇİLEMEZ! Tüketilmesi ağır toksisite riski taşır.'
             : 'Mikropartiküller saptandı. Arıtılmadan içilmesi önerilmez.'),
-        microplasticRiskLevel:
-          sample.microplasticRiskLevel || (sample.initialConcentration > 50 ? 'AŞIRI YÜKSEK' : 'YÜKSEK'),
+        microplasticRiskLevel: isClean
+          ? 'TEMİZ'
+          : sample.microplasticRiskLevel || (sample.initialConcentration > 50 ? 'AŞIRI YÜKSEK' : 'YÜKSEK'),
       };
     }
     return {
@@ -91,7 +108,7 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
       particles: [],
       turbidity: 0,
       isDrinkable: false,
-      potabilityStatus: 'İÇİLEMEZ',
+      potabilityStatus: 'İÇİLMEYE UYGUN DEĞİL',
       potabilityWarning: '',
       microplasticRiskLevel: 'AŞIRI YÜKSEK',
     };
@@ -100,19 +117,24 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
   // Slot 2: Arıtılmış / Aktif Karbon Sonrası Numune
   const [treatedSlot, setTreatedSlot] = useState<DataSlot>(() => {
     if (sample) {
+      const isClean =
+        sample.isDrinkable === true ||
+        sample.potabilityStatus === 'İÇİLMEYE UYGUN' ||
+        sample.potabilityStatus === 'İÇİLEBİLİR';
+
       return {
         isLoaded: true,
         image: sample.afterImage,
-        title: '2. Veri: Aktif Karbon Çıkış Suyu',
-        particleCount: sample.treatedConcentration,
-        particles: sample.particles.filter((p) => !p.capturedByBiochar),
+        title: isClean ? '2. Veri: Zaten Berrak İçme Suyu' : '2. Veri: Aktif Karbon Çıkış Suyu',
+        particleCount: isClean ? 0 : sample.treatedConcentration,
+        particles: isClean ? [] : sample.particles.filter((p) => !p.capturedByBiochar),
         turbidity: sample.turbidityAfter,
-        // Even after active carbon, if raw was dirty sea/toxic water, it's not potable without RO
-        isDrinkable: false,
-        potabilityStatus: 'ŞARTLI',
-        potabilityWarning:
-          '⚠️ ÖN ARITILMIŞ SU: Ceviz kabuğu aktif karbonu mikroplastikleri yüksek oranda tutmuştur. Ancak ham su kirli/deniz atığı niteliğinde olduğundan tam içilebilir hale gelmesi için tuz giderme ve UV dezenfeksiyonu şarttır.',
-        microplasticRiskLevel: 'DÜŞÜK',
+        isDrinkable: isClean,
+        potabilityStatus: isClean ? 'İÇİLMEYE UYGUN' : 'ŞARTLI',
+        potabilityWarning: isClean
+          ? '✅ Bu su zaten temizdir ve güvenle içilebilir.'
+          : '⚠️ ÖN ARITILMIŞ SU: Ceviz kabuğu aktif karbonu mikroplastikleri yüksek oranda tutmuştur. Ancak ham su kirli/deniz atığı niteliğinde olduğundan tam içilebilir hale gelmesi için tuz giderme ve UV dezenfeksiyonu şarttır.',
+        microplasticRiskLevel: isClean ? 'TEMİZ' : 'DÜŞÜK',
       };
     }
     return {
@@ -137,47 +159,59 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
   // Sync when parent sample updates (e.g. from main upload or demo loader)
   React.useEffect(() => {
     if (sample) {
+      const isClean =
+        sample.isDrinkable === true ||
+        sample.potabilityStatus === 'İÇİLMEYE UYGUN' ||
+        sample.potabilityStatus === 'İÇİLEBİLİR';
       const isDirty =
-        sample.particles.length >= 4 ||
-        sample.initialConcentration > 25 ||
-        sample.turbidityBefore > 4.0 ||
-        sample.potabilityStatus === 'İÇİLEMEZ';
+        !isClean &&
+        (sample.particles.length >= 4 ||
+          sample.initialConcentration > 25 ||
+          sample.turbidityBefore > 4.0 ||
+          sample.potabilityStatus === 'İÇİLEMEZ' ||
+          sample.potabilityStatus === 'İÇİLMEYE UYGUN DEĞİL');
 
       setRawSlot({
         isLoaded: true,
         image: sample.beforeImage,
-        title: sample.title || '1. Veri: Ham Su Numunesi',
-        particleCount: sample.initialConcentration,
-        particles: sample.particles,
+        title: sample.title || (isClean ? '1. Veri: Temiz İçme Suyu' : '1. Veri: Ham Su Numunesi'),
+        particleCount: isClean ? 0 : sample.initialConcentration,
+        particles: isClean ? [] : sample.particles,
         turbidity: sample.turbidityBefore,
-        isDrinkable: sample.isDrinkable ?? !isDirty,
-        potabilityStatus: sample.potabilityStatus || (isDirty ? 'İÇİLEMEZ' : 'ŞARTLI'),
+        isDrinkable: isClean,
+        potabilityStatus: isClean
+          ? 'İÇİLMEYE UYGUN'
+          : sample.potabilityStatus || (isDirty ? 'İÇİLMEYE UYGUN DEĞİL' : 'ŞARTLI'),
         potabilityWarning:
           sample.potabilityWarning ||
-          '🛑 KRİTİK SAĞLIK UYARISI: Bu su numunesi yüksek mikroplastik konsantrasyonu ve kirlilik içerir. KESİNLİKLE İÇİLEMEZ! Tüketilmesi ağır toksisite riski taşır.',
-        microplasticRiskLevel:
-          sample.microplasticRiskLevel || (sample.initialConcentration > 50 ? 'AŞIRI YÜKSEK' : 'YÜKSEK'),
+          (isClean
+            ? '✅ İÇİLMEYE UYGUN: Görselde şeffaf parçacık veya mikroplastik saptanmamıştır. DSÖ standartlarına uygundur.'
+            : '🛑 KRİTİK SAĞLIK UYARISI: Bu su numunesi yüksek mikroplastik konsantrasyonu ve kirlilik içerir. KESİNLİKLE İÇİLEMEZ! Tüketilmesi ağır toksisite riski taşır.'),
+        microplasticRiskLevel: isClean
+          ? 'TEMİZ'
+          : sample.microplasticRiskLevel || (sample.initialConcentration > 50 ? 'AŞIRI YÜKSEK' : 'YÜKSEK'),
       });
 
       setTreatedSlot({
         isLoaded: true,
         image: sample.afterImage,
-        title: '2. Veri: Aktif Karbon Çıkış Suyu',
-        particleCount: sample.treatedConcentration,
-        particles: sample.particles.filter((p) => !p.capturedByBiochar),
+        title: isClean ? '2. Veri: Berrak Su' : '2. Veri: Aktif Karbon Çıkış Suyu',
+        particleCount: isClean ? 0 : sample.treatedConcentration,
+        particles: isClean ? [] : sample.particles.filter((p) => !p.capturedByBiochar),
         turbidity: sample.turbidityAfter,
-        isDrinkable: false,
-        potabilityStatus: 'ŞARTLI',
-        potabilityWarning:
-          '⚠️ ÖN ARITILMIŞ SU: Ceviz kabuğu aktif karbon mikroplastiklerin %' +
-          sample.efficiency.toFixed(1) +
-          ' kadarını hapsetti. İçme suyu için ilave dezenfeksiyon önerilir.',
-        microplasticRiskLevel: 'DÜŞÜK',
+        isDrinkable: isClean,
+        potabilityStatus: isClean ? 'İÇİLMEYE UYGUN' : 'ŞARTLI',
+        potabilityWarning: isClean
+          ? '✅ Bu su içilmeye uygundur.'
+          : '⚠️ ÖN ARITILMIŞ SU: Ceviz kabuğu aktif karbon mikroplastiklerin %' +
+            sample.efficiency.toFixed(1) +
+            ' kadarını hapsetti. İçme suyu için ilave dezenfeksiyon önerilir.',
+        microplasticRiskLevel: isClean ? 'TEMİZ' : 'DÜŞÜK',
       });
     }
   }, [sample]);
 
-  // Handle uploading custom image for Slot 1 (Raw/Dirty Water)
+  // Handle uploading custom image for Slot 1 (Raw/Dirty Water or Clean Water)
   const handleSlot1Upload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -190,39 +224,59 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
       const cleanBase64 = base64Url.split(',')[1];
 
       try {
-        const response = await fetch('/api/analyze-image', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            imageBase64: cleanBase64,
-            mimeType: file.type || 'image/jpeg',
-            filename: file.name,
-          }),
-        });
+        // Run Real-Time AI Water Analysis locally first
+        const localAi = await analyzeWaterImageRealtime(base64Url);
 
-        if (!response.ok) {
-          throw new Error('Analiz servisi yanıt vermedi');
+        if (!localAi.isRelevant) {
+          alert(
+            localAi.potabilityWarning ||
+              '⚠️ Nazikçe Uyarı: Yüklenen görsel bir su numunesi içermemektedir. Lütfen temiz veya bulanık bir su numunesi görseli yükleyiniz.'
+          );
+          setIsSlot1Analyzing(false);
+          return;
         }
 
-        const data = await response.json();
-        const particles: MicroplasticParticle[] = (data.particles || []).map(
-          (p: any, idx: number) => ({
-            id: p.id || `p-slot1-${idx}`,
-            type: p.type || 'PET',
-            customLabel: p.customLabel || `${p.type} Lif`,
-            sizeMicrons: p.sizeMicrons || 45,
-            x: p.x || 50,
-            y: p.y || 50,
-            shape: p.shape || 'Lif (Fiber)',
-            capturedByBiochar: true,
-            confidence: p.confidence || 0.95,
-            color: p.color || '#ef4444',
-            notes: p.notes || 'Ham kirli sudan tespit edildi.',
-          })
-        );
+        const isClean = localAi.isDrinkable;
+        let particles: MicroplasticParticle[] = isClean ? [] : localAi.particles;
+        let initialCount = isClean ? 0 : localAi.particleCount;
+        let turbid = localAi.turbidity || (isClean ? 0.73 : 18.5);
 
-        const initialCount = data.initialConcentration || Math.max(30, particles.length * 18);
-        const turbid = data.turbidityBefore || 18.5;
+        if (!isClean) {
+          try {
+            const response = await fetch('/api/analyze-image', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                imageBase64: cleanBase64,
+                mimeType: file.type || 'image/jpeg',
+                filename: file.name,
+              }),
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              if (data.particles && data.particles.length > 0) {
+                particles = data.particles.map((p: any, idx: number) => ({
+                  id: p.id || `p-slot1-${idx}`,
+                  type: p.type || 'PET',
+                  customLabel: p.customLabel || `${p.type} Lif`,
+                  sizeMicrons: p.sizeMicrons || 45,
+                  x: p.x || 50,
+                  y: p.y || 50,
+                  shape: p.shape || 'Lif (Fiber)',
+                  capturedByBiochar: true,
+                  confidence: p.confidence || 0.95,
+                  color: p.color || '#ef4444',
+                  notes: p.notes || 'Ham kirli sudan tespit edildi.',
+                }));
+              }
+              if (data.initialConcentration) initialCount = data.initialConcentration;
+              if (data.turbidityBefore) turbid = data.turbidityBefore;
+            }
+          } catch {
+            // Local AI particles already assigned
+          }
+        }
 
         const updatedRaw: DataSlot = {
           isLoaded: true,
@@ -231,24 +285,39 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
           particleCount: initialCount,
           particles: particles,
           turbidity: turbid,
-          isDrinkable: false, // DIRTY WATER IS ALWAYS NON-DRINKABLE
-          potabilityStatus: 'İÇİLEMEZ',
+          isDrinkable: isClean,
+          potabilityStatus: isClean ? 'İÇİLMEYE UYGUN' : 'İÇİLMEYE UYGUN DEĞİL',
           potabilityWarning:
-            '🛑 KRİTİK SAĞLIK UYARISI: Yüklenen görselde yoğun plastik atıkları ve mikro-lifler tespit edildi. KESİNLİKLE İÇİLEMEZ! Tüketilmesi toksik zehirlenme ve gastrointestinal tehlike oluşturur.',
-          microplasticRiskLevel: 'AŞIRI YÜKSEK',
+            localAi.potabilityWarning ||
+            (isClean
+              ? '✅ İÇİLMEYE UYGUN: Görselde şeffaf parçacık veya mikroplastik saptanmamıştır. DSÖ ve Sağlık Bakanlığı standartlarına UYGUNDUR.'
+              : '🛑 KRİTİK SAĞLIK UYARISI: Yüklenen su numunesinde şeffaf parçacıklar, mikroplastikler ve bulanıklık saptanmıştır. KESİNLİKLE İÇİLMEYE UYGUN DEĞİLDİR!'),
+          microplasticRiskLevel: isClean ? 'TEMİZ' : 'AŞIRI YÜKSEK',
         };
 
         setRawSlot(updatedRaw);
 
-        // If treated slot was empty or needs update, auto-filter with walnut active carbon
-        if (!treatedSlot.isLoaded || !treatedSlot.image) {
+        if (isClean) {
+          setTreatedSlot({
+            isLoaded: true,
+            image: base64Url,
+            title: '2. Veri: Zaten Berrak İçme Suyu',
+            particleCount: 0,
+            particles: [],
+            turbidity: turbid,
+            isDrinkable: true,
+            potabilityStatus: 'İÇİLMEYE UYGUN',
+            potabilityWarning: '✅ Bu numune zaten temiz ve içilmeye uygundur. İlave filtrasyon gerektirmez.',
+            microplasticRiskLevel: 'TEMİZ',
+          });
+        } else if (!treatedSlot.isLoaded || !treatedSlot.image) {
           const efficiency = 96.4;
           const treatedCount = Math.max(0, Math.round(initialCount * (1 - efficiency / 100)));
           const treatedTurbid = +(turbid * 0.05).toFixed(2);
 
           const newTreated: DataSlot = {
             isLoaded: true,
-            image: base64Url, // or treated visual
+            image: base64Url,
             title: '2. Veri: Ceviz Kabuğu Filtre Çıkışı',
             particleCount: treatedCount,
             particles: particles.slice(0, 1),
@@ -267,88 +336,34 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
           const syntheticSample = calculateDynamicSampleData({
             id: `cmp-${Date.now()}`,
             title: file.name,
-            source: 'Kıyaslama Sekmesi Ham Su Yüklemesi',
-            description: 'Kullanıcı tarafından yüklenen kirli su numunesi.',
+            source: 'Kıyaslama Sekmesi Yüklemesi',
+            description: isClean
+              ? 'Kullanıcı tarafından yüklenen temiz su numunesi.'
+              : 'Kullanıcı tarafından yüklenen kirli su numunesi.',
             beforeImage: base64Url,
             afterImage: base64Url,
             particles: particles,
             baseTurbidity: turbid,
           });
-          syntheticSample.potabilityStatus = 'İÇİLEMEZ';
-          syntheticSample.isDrinkable = false;
+          syntheticSample.potabilityStatus = isClean ? 'İÇİLMEYE UYGUN' : 'İÇİLMEYE UYGUN DEĞİL';
+          syntheticSample.isDrinkable = isClean;
           syntheticSample.potabilityWarning = updatedRaw.potabilityWarning;
-          syntheticSample.microplasticRiskLevel = 'AŞIRI YÜKSEK';
+          syntheticSample.microplasticRiskLevel = isClean ? 'TEMİZ' : 'AŞIRI YÜKSEK';
           onUpdateSample(syntheticSample);
         }
       } catch (err) {
-        console.warn('API hatası, yerel spektroskopi simülasyonu çalıştırılıyor...', err);
-        // Realistic fallback for dirty water
-        const fallbackParticles: MicroplasticParticle[] = [
-          {
-            id: 'fb-1',
-            type: 'PET',
-            customLabel: 'PET Şişe Parçası',
-            sizeMicrons: 85,
-            x: 28,
-            y: 42,
-            shape: 'Parçacık (Fragment)',
-            capturedByBiochar: true,
-            confidence: 0.96,
-            color: '#ec4899',
-            notes: 'Plastik atık kalıntısı.',
-          },
-          {
-            id: 'fb-2',
-            type: 'PP',
-            customLabel: 'PP Ambalaj Lifi',
-            sizeMicrons: 110,
-            x: 64,
-            y: 35,
-            shape: 'Lif (Fiber)',
-            capturedByBiochar: true,
-            confidence: 0.94,
-            color: '#f59e0b',
-            notes: 'Deniz çöpü kaynaklı polipropilen lifi.',
-          },
-          {
-            id: 'fb-3',
-            type: 'PE',
-            customLabel: 'PE Poşet Filmi',
-            sizeMicrons: 140,
-            x: 48,
-            y: 68,
-            shape: 'Film',
-            capturedByBiochar: true,
-            confidence: 0.92,
-            color: '#38bdf8',
-            notes: 'Polietilen film atığı.',
-          },
-          {
-            id: 'fb-4',
-            type: 'PS',
-            customLabel: 'PS Köpük Kalıntısı',
-            sizeMicrons: 95,
-            x: 75,
-            y: 58,
-            shape: 'Parçacık (Fragment)',
-            capturedByBiochar: true,
-            confidence: 0.95,
-            color: '#a855f7',
-            notes: 'Strafor köpük mikroplastik döküntüsü.',
-          },
-        ];
-
+        console.warn('Yerel spektroskopi simülasyonu çalıştırılıyor...', err);
         setRawSlot({
           isLoaded: true,
           image: base64Url,
           title: `1. Veri: ${file.name}`,
-          particleCount: 112,
-          particles: fallbackParticles,
-          turbidity: 24.5,
+          particleCount: 85,
+          particles: [],
+          turbidity: 14.5,
           isDrinkable: false,
-          potabilityStatus: 'İÇİLEMEZ',
+          potabilityStatus: 'İÇİLMEYE UYGUN DEĞİL',
           potabilityWarning:
-            '🛑 KRİTİK SAĞLIK UYARISI: Bu kirli su numunesinde yüksek konsantrasyonda mikroplastik parçacıkları saptanmıştır. KESİNLİKLE İÇİLEMEZ!',
+            '🛑 KRİTİK SAĞLIK UYARISI: Bu su numunesinde mikroplastik parçacıkları saptanmıştır. İÇİLMEYE UYGUN DEĞİLDİR!',
           microplasticRiskLevel: 'AŞIRI YÜKSEK',
         });
       } finally {
@@ -549,21 +564,109 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button
-              onClick={onLoadDemoSample}
-              className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 font-semibold text-xs flex items-center gap-1.5 border border-amber-500/30 transition"
+              onClick={() => {
+                const s = CLEAN_WATER_SAMPLE_1;
+                setRawSlot({
+                  isLoaded: true,
+                  image: s.beforeImage,
+                  title: s.title,
+                  particleCount: s.initialConcentration,
+                  particles: s.particles,
+                  turbidity: s.turbidityBefore,
+                  isDrinkable: true,
+                  potabilityStatus: 'İÇİLMEYE UYGUN',
+                  potabilityWarning: s.potabilityWarning || '',
+                  microplasticRiskLevel: 'TEMİZ',
+                });
+                if (onUpdateSample) onUpdateSample(s);
+              }}
+              className="px-2.5 py-1.5 rounded-xl bg-emerald-950/70 hover:bg-emerald-900 text-emerald-300 font-semibold text-xs flex items-center gap-1.5 border border-emerald-500/40 transition"
             >
-              <FlaskConical className="w-3.5 h-3.5 text-amber-400" />
-              <span>Hazır Laboratuvar Testini Yükle</span>
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <span>1. Temiz Su (İçilmeye Uygun)</span>
+            </button>
+            <button
+              onClick={() => {
+                const s = CLEAN_WATER_SAMPLE_2;
+                setRawSlot({
+                  isLoaded: true,
+                  image: s.beforeImage,
+                  title: s.title,
+                  particleCount: s.initialConcentration,
+                  particles: s.particles,
+                  turbidity: s.turbidityBefore,
+                  isDrinkable: true,
+                  potabilityStatus: 'İÇİLMEYE UYGUN',
+                  potabilityWarning: s.potabilityWarning || '',
+                  microplasticRiskLevel: 'TEMİZ',
+                });
+                if (onUpdateSample) onUpdateSample(s);
+              }}
+              className="px-2.5 py-1.5 rounded-xl bg-emerald-950/70 hover:bg-emerald-900 text-emerald-300 font-semibold text-xs flex items-center gap-1.5 border border-emerald-500/40 transition"
+            >
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <span>2. Dökülen Su (İçilmeye Uygun)</span>
+            </button>
+            <button
+              onClick={() => {
+                const s = CONTAMINATED_SAMPLE_3;
+                setRawSlot({
+                  isLoaded: true,
+                  image: s.beforeImage,
+                  title: s.title,
+                  particleCount: s.initialConcentration,
+                  particles: s.particles,
+                  turbidity: s.turbidityBefore,
+                  isDrinkable: false,
+                  potabilityStatus: 'İÇİLMEYE UYGUN DEĞİL',
+                  potabilityWarning: s.potabilityWarning || '',
+                  microplasticRiskLevel: 'AŞIRI YÜKSEK',
+                });
+                if (onUpdateSample) onUpdateSample(s);
+              }}
+              className="px-2.5 py-1.5 rounded-xl bg-rose-950/70 hover:bg-rose-900 text-rose-300 font-semibold text-xs flex items-center gap-1.5 border border-rose-500/40 transition"
+            >
+              <AlertOctagon className="w-3.5 h-3.5 text-rose-400" />
+              <span>3. Mikroplastikli Su (İçilmeye Uygun Değil)</span>
             </button>
           </div>
         </div>
       </div>
 
       {/* =========================================================================
-          CRITICAL DANGER ALERT IF RAW WATER IS POLLUTED (KİRLİ SU İÇİLEMEZ UYARISI)
+          POTABILITY BANNER (İÇİLMEYE UYGUN / İÇİLMEYE UYGUN DEĞİL)
           ========================================================================= */}
+      {rawSlot.isLoaded && rawSlot.isDrinkable && (
+        <div className="bg-gradient-to-r from-emerald-950/90 via-slate-900 to-teal-950/80 border-2 border-emerald-500/80 rounded-2xl p-4 sm:p-5 shadow-2xl">
+          <div className="flex items-start gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-emerald-950 border border-emerald-500 flex items-center justify-center text-emerald-400 shrink-0">
+              <ShieldCheck className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="flex flex-wrap items-center gap-2 mb-1">
+                <span className="px-2.5 py-0.5 rounded-md bg-emerald-900 text-white font-extrabold text-xs tracking-wider uppercase border border-emerald-400">
+                  ✅ ONAYLANDI: İÇİLMEYE UYGUN (GÜVENLİ TEMİZ SU)
+                </span>
+                <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-black/60 text-emerald-300 border border-emerald-800">
+                  Saflık: %100 • 0 Mikroplastik
+                </span>
+              </div>
+              <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-medium">
+                {rawSlot.potabilityWarning ||
+                  'Yapay zeka optik ve partikül analizinde görsel berrak ve temiz içme suyu olarak tanımlanmıştır. Mikroplastik veya şeffaf partikül saptanmamıştır.'}
+              </p>
+              <div className="mt-2.5 flex flex-wrap items-center gap-4 text-[11px] font-mono text-emerald-300/90">
+                <span>• DSÖ (WHO) & Sağlık Bakanlığı: <strong>İÇİLEBİLİR (UYGUN)</strong></span>
+                <span>• Bulanıklık: <strong>{rawSlot.turbidity} NTU</strong> (&lt; 1.0 Sınırının Altında)</span>
+                <span>• Tespit Edilen Parçacık: <strong>0 adet/ml</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {rawSlot.isLoaded && !rawSlot.isDrinkable && (
         <div className="bg-gradient-to-r from-rose-950/90 via-slate-900 to-rose-950/80 border-2 border-rose-500/80 rounded-2xl p-4 sm:p-5 shadow-2xl animate-pulse">
           <div className="flex items-start gap-3.5">
@@ -573,7 +676,7 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-1">
                 <span className="px-2.5 py-0.5 rounded-md bg-rose-900 text-white font-extrabold text-xs tracking-wider uppercase border border-rose-400">
-                  🛑 KRİTİK UYARI: KİRLİ SU TESPİT EDİLDİ - KESİNLİKLE İÇİLEMEZ!
+                  🛑 KRİTİK UYARI: KİRLİ SU TESPİT EDİLDİ - İÇİLMEYE UYGUN DEĞİL!
                 </span>
                 <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-black/60 text-rose-300 border border-rose-800">
                   Mikroplastik Seviyesi: {rawSlot.microplasticRiskLevel}
@@ -597,17 +700,29 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
           ========================================================================= */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* ================= SLOT 1: HAM / KİRLİ SU ================= */}
-        <div className="bg-slate-900/90 border-2 border-rose-900/50 rounded-2xl overflow-hidden shadow-xl flex flex-col">
+        <div className={`bg-slate-900/90 border-2 rounded-2xl overflow-hidden shadow-xl flex flex-col ${
+          rawSlot.isDrinkable ? 'border-emerald-500/40' : 'border-rose-900/50'
+        }`}>
           {/* Header */}
-          <div className="p-3.5 bg-rose-950/40 border-b border-rose-900/50 flex items-center justify-between">
+          <div className={`p-3.5 border-b flex items-center justify-between ${
+            rawSlot.isDrinkable ? 'bg-emerald-950/40 border-emerald-500/40' : 'bg-rose-950/40 border-rose-900/50'
+          }`}>
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse" />
-              <h3 className="text-xs sm:text-sm font-extrabold text-rose-300 uppercase tracking-wide">
-                1. Veri: Arıtma Öncesi (Ham / Kirli Su)
+              <span className={`w-2.5 h-2.5 rounded-full ${rawSlot.isDrinkable ? 'bg-emerald-400' : 'bg-rose-500 animate-pulse'}`} />
+              <h3 className={`text-xs sm:text-sm font-extrabold uppercase tracking-wide ${
+                rawSlot.isDrinkable ? 'text-emerald-300' : 'text-rose-300'
+              }`}>
+                {rawSlot.isDrinkable ? '1. Veri: Berrak Temiz Su' : '1. Veri: Arıtma Öncesi (Ham Su)'}
               </h3>
             </div>
-            <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-md bg-rose-950 text-rose-300 border border-rose-600 font-extrabold">
-              {rawSlot.isLoaded ? '❌ İÇİLEMEZ' : 'Veri Bekleniyor'}
+            <span className={`text-[10px] font-mono px-2.5 py-0.5 rounded-md font-extrabold border ${
+              rawSlot.isLoaded
+                ? rawSlot.isDrinkable
+                  ? 'bg-emerald-950 text-emerald-300 border-emerald-500/60'
+                  : 'bg-rose-950 text-rose-300 border-rose-600'
+                : 'bg-slate-800 text-slate-400 border-slate-700'
+            }`}>
+              {rawSlot.isLoaded ? (rawSlot.isDrinkable ? '✅ İÇİLMEYE UYGUN' : '❌ İÇİLMEYE UYGUN DEĞİL') : 'Veri Bekleniyor'}
             </span>
           </div>
 
@@ -617,7 +732,7 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
               <>
                 <img
                   src={rawSlot.image}
-                  alt="Ham Kirli Su Numunesi"
+                  alt="Su Numunesi"
                   className="w-full h-full object-cover"
                 />
 
@@ -639,8 +754,12 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
                 ))}
 
                 {/* Status Badges on Image */}
-                <div className="absolute top-2 left-2 px-2 py-1 rounded bg-rose-950/90 backdrop-blur-sm text-[10px] font-mono text-rose-300 border border-rose-700/60 font-bold">
-                  Ham Kirli Numune • {rawSlot.particleCount} adet/ml
+                <div className={`absolute top-2 left-2 px-2 py-1 rounded backdrop-blur-sm text-[10px] font-mono font-bold border ${
+                  rawSlot.isDrinkable
+                    ? 'bg-emerald-950/90 text-emerald-300 border-emerald-700/60'
+                    : 'bg-rose-950/90 text-rose-300 border-rose-700/60'
+                }`}>
+                  {rawSlot.isDrinkable ? 'Temiz Su Numunesi • 0 adet/ml' : `Ham Kirli Numune • ${rawSlot.particleCount} adet/ml`}
                 </div>
 
                 <div className="absolute bottom-2 right-2">
@@ -710,14 +829,22 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
               </div>
             </div>
 
-            <div className="p-2.5 rounded-xl bg-rose-950/30 border border-rose-900/50 text-xs flex items-start gap-2">
-              <XCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+            <div className={`p-2.5 rounded-xl border text-xs flex items-start gap-2 ${
+              rawSlot.isDrinkable ? 'bg-emerald-950/30 border-emerald-500/40' : 'bg-rose-950/30 border-rose-900/50'
+            }`}>
+              {rawSlot.isDrinkable ? (
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+              ) : (
+                <XCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+              )}
               <div>
-                <p className="text-rose-300 text-[11px] font-bold">
-                  İçilebilirlik: ❌ KESİNLİKLE İÇİLEMEZ
+                <p className={`text-[11px] font-bold ${rawSlot.isDrinkable ? 'text-emerald-300' : 'text-rose-300'}`}>
+                  İçilebilirlik: {rawSlot.isDrinkable ? '✅ İÇİLMEYE UYGUN' : '❌ İÇİLMEYE UYGUN DEĞİL'}
                 </p>
                 <p className="text-slate-400 text-[10px] leading-tight mt-0.5">
-                  Yüksek partikül ve bulanıklık insan sağlığı için doğrudan toksik tehlike oluşturur.
+                  {rawSlot.isDrinkable
+                    ? 'Bu su numunesinde mikroplastik saptanmamıştır. DSÖ içme suyu standartlarına uygundur.'
+                    : 'Yüksek partikül ve bulanıklık insan sağlığı için doğrudan toksik tehlike oluşturur.'}
                 </p>
               </div>
             </div>
