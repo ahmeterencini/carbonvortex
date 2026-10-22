@@ -31,7 +31,7 @@ export interface SampleData {
   iodineNumber?: number; // mg/g
   potabilityStatus?: 'İÇİLMEYE UYGUN' | 'İÇİLMEYE UYGUN DEĞİL' | 'İÇİLEMEZ' | 'ŞARTLI' | 'İÇİLEBİLİR' | 'SU NUMUNESİ DEĞİL';
   potabilityWarning?: string;
-  microplasticRiskLevel?: 'AŞIRI YÜKSEK' | 'YÜKSEK' | 'ORTA' | 'DÜŞÜK' | 'TEMİZ';
+  microplasticRiskLevel?: 'AŞIRI YÜKSEK' | 'YÜKSEK' | 'ORTA' | 'DÜŞÜK' | 'TEMİZ' | string;
   isDrinkable?: boolean;
   particles: MicroplasticParticle[];
   beforeImage: string;

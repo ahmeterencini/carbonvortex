@@ -174,23 +174,23 @@ export default function App() {
         // 1. Gerçek Zamanlı İstemci Bilgisayarlı Görü Analizi (Client-Side Real-Time AI)
         const realtimeAIResult = await analyzeWaterImageRealtime(base64Url, file.name);
 
-        // Su numunesi içermiyorsa: Nazikçe uyar
+        // Su numunesi içermiyorsa: Doğrudan uyar ve sonlandır
         if (!realtimeAIResult.isRelevant) {
           setIsAnalyzing(false);
           setRejectionWarning({
             title: 'Numune Doğrulama Uyarısı',
             message:
               realtimeAIResult.rejectionReason ||
-              'Yüklediğiniz görselde su veya sıvı numunesi tespit edilemedi. Lütfen analiz için bir su bardağı, berrak su akıntısı veya su numunesi fotoğrafı yükleyiniz.',
+              'Uyarı: Lütfen geçerli bir su numunesi görseli yükleyin. Yüklenen fotoğraf su örneği olarak tanımlanamadı.',
             filename: file.name,
           });
           return;
         }
 
         setAnalysisProgress(65);
-        setAnalysisStep('Şeffaf parçacıklar, mikroplastikler ve optik bulanıklık taranıyor...');
+        setAnalysisStep('Berraklık, bulanıklık ve spektroskopik optik analiz yapılıyor...');
 
-        // Sunucu analizi (varsa zenginleştir)
+        // Sunucu analizi (Gemini veya akıllı sunucu değerlendirmesi)
         let aiResult: any = realtimeAIResult;
         try {
           const response = await fetch('/api/analyze-image', {
@@ -200,6 +200,7 @@ export default function App() {
               imageBase64: base64Url,
               mimeType: file.type || 'image/jpeg',
               filename: file.name,
+              clientAnalysis: realtimeAIResult,
             }),
           });
           if (response.ok) {
@@ -209,7 +210,7 @@ export default function App() {
             }
           }
         } catch {
-          // Sunucu yanıt vermese de gerçek zamanlı yapay zeka kesintisiz çalışır
+          // Sunucu gecikse de gerçek zamanlı yapay zeka kesintisiz çalışır
         }
 
         if (!aiResult.isRelevant) {
@@ -218,7 +219,7 @@ export default function App() {
             title: 'Numune Doğrulama Uyarısı',
             message:
               aiResult.rejectionReason ||
-              'Yüklediğiniz görsel geçerli bir su numunesi ile eşleşmedi. Lütfen bir su bardağı veya su fotoğrafı yükleyiniz.',
+              'Uyarı: Lütfen geçerli bir su numunesi görseli yükleyin. Yüklenen fotoğraf su örneği olarak tanımlanamadı.',
             filename: file.name,
           });
           return;

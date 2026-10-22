@@ -28,6 +28,7 @@ import {
   CONTAMINATED_SAMPLE_3,
 } from '../data/sampleData';
 import { analyzeWaterImageRealtime } from '../utils/realtimeWaterAI';
+import { RejectionWarningModal } from './RejectionWarningModal';
 
 interface ComparisonViewProps {
   sample: SampleData | null;
@@ -48,7 +49,7 @@ interface DataSlot {
   isDrinkable: boolean;
   potabilityStatus: 'İÇİLMEYE UYGUN' | 'İÇİLMEYE UYGUN DEĞİL' | 'İÇİLEMEZ' | 'ŞARTLI' | 'İÇİLEBİLİR' | 'SU NUMUNESİ DEĞİL';
   potabilityWarning: string;
-  microplasticRiskLevel: 'AŞIRI YÜKSEK' | 'YÜKSEK' | 'ORTA' | 'DÜŞÜK' | 'TEMİZ';
+  microplasticRiskLevel: 'AŞIRI YÜKSEK' | 'YÜKSEK' | 'ORTA' | 'DÜŞÜK' | 'TEMİZ' | string;
 }
 
 export const ComparisonView: React.FC<ComparisonViewProps> = ({
@@ -155,6 +156,11 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
   const [isSlot2Analyzing, setIsSlot2Analyzing] = useState(false);
   const slot1InputRef = useRef<HTMLInputElement>(null);
   const slot2InputRef = useRef<HTMLInputElement>(null);
+  const [rejectionWarning, setRejectionWarning] = useState<{
+    title?: string;
+    message: string;
+    filename?: string;
+  } | null>(null);
 
   // Sync when parent sample updates (e.g. from main upload or demo loader)
   React.useEffect(() => {
@@ -228,18 +234,22 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
         const localAi = await analyzeWaterImageRealtime(base64Url);
 
         if (!localAi.isRelevant) {
-          alert(
-            localAi.potabilityWarning ||
-              '⚠️ Nazikçe Uyarı: Yüklenen görsel bir su numunesi içermemektedir. Lütfen temiz veya bulanık bir su numunesi görseli yükleyiniz.'
-          );
+          setRejectionWarning({
+            title: 'Numune Doğrulama Uyarısı',
+            message:
+              localAi.rejectionReason ||
+              localAi.potabilityWarning ||
+              'Uyarı: Lütfen geçerli bir su numunesi görseli yükleyin. Yüklenen fotoğraf su örneği olarak tanımlanamadı.',
+            filename: file.name,
+          });
           setIsSlot1Analyzing(false);
           return;
         }
 
         const isClean = localAi.isDrinkable;
         let particles: MicroplasticParticle[] = isClean ? [] : localAi.particles;
-        let initialCount = isClean ? 0 : localAi.particleCount;
-        let turbid = localAi.turbidity || (isClean ? 0.73 : 18.5);
+        let initialCount = isClean ? 0 : (localAi.particleCount ?? localAi.initialConcentration ?? localAi.particles.length);
+        let turbid = localAi.turbidity ?? localAi.turbidityBefore ?? (isClean ? 0.45 : 14.5);
 
         if (!isClean) {
           try {
@@ -250,6 +260,7 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
                 imageBase64: cleanBase64,
                 mimeType: file.type || 'image/jpeg',
                 filename: file.name,
+                clientAnalysis: localAi,
               }),
             });
 
@@ -1147,6 +1158,19 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>
+
+      <RejectionWarningModal
+        warning={rejectionWarning}
+        onClose={() => setRejectionWarning(null)}
+        onOpenUpload={() => {
+          setRejectionWarning(null);
+          slot1InputRef.current?.click();
+        }}
+        onLoadDemoSample={() => {
+          setRejectionWarning(null);
+          onLoadDemoSample();
+        }}
+      />
     </div>
   );
 };

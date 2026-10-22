@@ -39,10 +39,10 @@ export const RejectionWarningModal: React.FC<RejectionWarningModalProps> = ({
           </div>
           <div>
             <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-amber-400 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-700/50">
-              Yapay Zeka Görsel Doğrulama
+              Yapay Zeka Giriş Filtresi
             </span>
             <h3 className="text-base sm:text-lg font-bold text-white mt-1">
-              {warning.title || 'Su / Mikroskopi Numunesi Tespit Edilemedi'}
+              {warning.title || 'Geçerli Bir Su Numunesi Görseli Yükleyin'}
             </h3>
             {warning.filename && (
               <p className="text-xs text-slate-400 font-mono mt-0.5 truncate max-w-xs">
@@ -52,10 +52,10 @@ export const RejectionWarningModal: React.FC<RejectionWarningModalProps> = ({
           </div>
         </div>
 
-        {/* Reason from Gemini */}
+        {/* Reason */}
         <div className="p-4 rounded-2xl bg-amber-950/25 border border-amber-500/30 mb-5">
           <p className="text-sm text-amber-200/90 leading-relaxed font-medium">
-            "{warning.message}"
+            "{warning.message || 'Uyarı: Lütfen geçerli bir su numunesi görseli yükleyin. Yüklenen fotoğraf su örneği olarak tanımlanamadı.'}"
           </p>
         </div>
 

@@ -1,6 +1,0 @@
-{
-  "name": "HydroScan AI - Manyetik Biyoçömür Analizcisi",
-  "description": "Ceviz kabuğundan üretilen manyetik biyoçömür filtrelerin sudaki mikroplastik arıtma verimliliğini yapay zeka ile analiz eden bilimsel mobil ve laboratuvar platformu.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
